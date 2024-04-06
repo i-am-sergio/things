@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"notifications-microservice/db"
+	"notifications-microservice/router"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -32,5 +33,8 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+
+	router.NotificationRoutes(e)
+
 	e.Logger.Fatal(e.Start(":" + port))
 }

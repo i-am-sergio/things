@@ -10,20 +10,20 @@ import (
 )
 
 func ConnectDB(uri string) *mongo.Client {
-	// Establecer opciones para la conexión
+	// Set client options
 	clientOptions := options.Client().ApplyURI(uri)
 
-	// Establecer contexto con un tiempo de espera
+	// Timeout for the connection
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Conectar a la base de datos MongoDB
+	// Connect to MongoDB
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Verificar la conexión
+	// Verify the connection
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
