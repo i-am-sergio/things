@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"product-microservice/db"
 	"product-microservice/models"
+	"product-microservice/service"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -13,13 +14,45 @@ var errorMessage string = "Internal Server Error"
 var notFoundMessage string = "Parameter Invalid"
 
 func CreateProduct(c echo.Context) error {
-    product := new(models.Product)
-    if err := c.Bind(product); err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": errorMessage})
-    }
+	
+    form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+    userID, err := strconv.ParseUint(form.Value["UserID"][0], 10, 32)
+	if err != nil {
+		return err
+	}
+
+	price, err := strconv.ParseFloat(form.Value["Price"][0], 64)
+	if err != nil {
+		return err
+	}
+
+    product := models.Product{
+		UserID:      uint(userID),
+		State:       true,
+		Status:      false,
+		Name:        form.Value["Name"][0],
+		Description: form.Value["Description"][0],
+		Category:    form.Value["Category"][0],
+		Price:       float64(price),
+		Rate:        0.0,
+		Ubication:   form.Value["Ubication"][0],
+	}
+	file, err := c.FormFile("image")
+	if err != nil {
+		return err
+	}
+    cld, ctx := service.Credentials()
+    cloudinaryURL, err := service.UploadImage(cld,ctx,file)
+	if err != nil {
+		return err
+	}
+    product.Image = cloudinaryURL
     if result := db.DB.Create(&product); result.Error != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": errorMessage})
-    }
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": result.Error.Error()})
+	}
     return c.JSON(http.StatusCreated, product)
 }
 
@@ -27,7 +60,7 @@ func GetProducts(c echo.Context) error {
 	var products []models.Product
 	result := db.DB.Find(&products)
 	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": errorMessage})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": errorMessage})
 	}
 	return c.JSON(http.StatusOK, products)
 }

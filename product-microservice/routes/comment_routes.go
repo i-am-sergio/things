@@ -11,6 +11,6 @@ func CommentRoutes(e *echo.Echo) {
 	comments.POST("", controllers.CreateComment)
 	comments.GET("/:id", controllers.GetCommentsByProductID)
 	comments.DELETE("/:id", controllers.DeleteComment)
-	comments.PUT("/rate/:id", controllers.UpdateProductRating)
+	//comments.PUT("/rate/:id", controllers.UpdateProductRating)
 	comments.PUT("/:id", controllers.UpdateComment)
 }

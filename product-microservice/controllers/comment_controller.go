@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-	"math"
 	"net/http"
 	"product-microservice/db"
 	"product-microservice/models"
@@ -86,33 +84,33 @@ func UpdateComment(c echo.Context) error {
     return c.JSON(http.StatusOK, comment)
 }
 
-func UpdateProductRating(c echo.Context) error {
-    productID, err := strconv.Atoi(c.Param("id"))
-    fmt.Println(productID)
-    if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid product ID"})
-    }
-    var product models.Product
-    if result := db.DB.First(&product, productID); result.Error != nil {
-        return c.JSON(http.StatusNotFound, map[string]string{"error": "Product not found"})
-    }
-    var comments []models.Comment
-    if result := db.DB.Where("product_id = ?", productID).Find(&comments); result.Error != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": result.Error.Error()})
-    }
-    totalRatings := 0.0
-    for _, comment := range comments {
-        totalRatings += comment.Rating
-    }
-    if len(comments) > 0 {
-        averageRating := totalRatings / float64(len(comments))
-        averageRating = math.Round(averageRating*100) / 100
-        product.Ratings = averageRating
-    } else {
-        product.Ratings = 0.0
-    }
-    if result := db.DB.Save(&product); result.Error != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": result.Error.Error()})
-    }
-    return c.JSON(http.StatusOK, product)
-}
+// func UpdateProductRating(c echo.Context) error {
+//     productID, err := strconv.Atoi(c.Param("id"))
+//     fmt.Println(productID)
+//     if err != nil {
+//         return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid product ID"})
+//     }
+//     var product models.Product
+//     if result := db.DB.First(&product, productID); result.Error != nil {
+//         return c.JSON(http.StatusNotFound, map[string]string{"error": "Product not found"})
+//     }
+//     var comments []models.Comment
+//     if result := db.DB.Where("product_id = ?", productID).Find(&comments); result.Error != nil {
+//         return c.JSON(http.StatusInternalServerError, map[string]string{"error": result.Error.Error()})
+//     }
+//     totalRatings := 0.0
+//     for _, comment := range comments {
+//         totalRatings += comment.Rating
+//     }
+//     if len(comments) > 0 {
+//         averageRating := totalRatings / float64(len(comments))
+//         averageRating = math.Round(averageRating*100) / 100
+//         product.Ratings = averageRating
+//     } else {
+//         product.Ratings = 0.0
+//     }
+//     if result := db.DB.Save(&product); result.Error != nil {
+//         return c.JSON(http.StatusInternalServerError, map[string]string{"error": result.Error.Error()})
+//     }
+//     return c.JSON(http.StatusOK, product)
+// }
