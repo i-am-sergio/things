@@ -12,6 +12,7 @@ import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
+	"github.com/labstack/echo/v4"
 )
 
 // CustomClaims contains custom data we want from the token.
@@ -77,4 +78,26 @@ func (c CustomClaims) HasScope(expectedScope string) bool {
 	}
 
 	return false
+}
+
+func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Aplica el middleware de validación de JWT
+		handler := EnsureValidToken()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			c.Set("user", c.Get("user"))
+			// No es necesario llamar next(c) aquí
+		}))
+		handler.ServeHTTP(c.Response(), c.Request())
+		// Este return es opcional, dependiendo de si quieres que la ejecución continúe después de este middleware o no.
+		return next(c) // Esta línea llama a la función de manejo una vez
+	}
+}
+
+func RoleMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Aplica el middleware de validación de JWT
+
+		// Este return es opcional, dependiendo de si quieres que la ejecución continúe después de este middleware o no.
+		return next(c) // Esta línea llama a la función de manejo una vez
+	}
 }
