@@ -1,6 +1,10 @@
 package db
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -8,7 +12,11 @@ import (
 var DB *gorm.DB
 
 func Init() {
-	DSN := "root:vwjKGGICPReSSydzmXpxQgYWUOTnUuXh@tcp(viaduct.proxy.rlwy.net:38706)/railway?charset=utf8mb4&parseTime=True&loc=Local"
+	err := godotenv.Load()
+	if err != nil {
+		panic(fmt.Errorf("error loading .env file: %v", err))
+	}
+	DSN := os.Getenv("DB_DSN")
 	var error error
 	DB, error = gorm.Open(mysql.Open(DSN), &gorm.Config{})
 

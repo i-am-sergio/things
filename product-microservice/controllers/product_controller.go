@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"mime/multipart"
 	"net/http"
 	"product-microservice/db"
 	"product-microservice/models"
@@ -13,22 +15,32 @@ import (
 var errorMessage string = "Internal Server Error"
 var notFoundMessage string = "Parameter Invalid"
 
+func validateRequiredFields(form *multipart.Form) error {
+    requiredFields := []string{"UserID", "Price", "Name", "Description", "Category", "Ubication"}
+    for _, field := range requiredFields {
+        if len(form.Value[field]) == 0 {
+            return fmt.Errorf("missing required field: %s", field)
+        }
+    }
+    return nil
+}
+
 func CreateProduct(c echo.Context) error {
-	
     form, err := c.MultipartForm()
 	if err != nil {
 		return err
 	}
+	if err := validateRequiredFields(form); err != nil {
+        return err
+    }
     userID, err := strconv.ParseUint(form.Value["UserID"][0], 10, 32)
 	if err != nil {
 		return err
 	}
-
 	price, err := strconv.ParseFloat(form.Value["Price"][0], 64)
 	if err != nil {
 		return err
 	}
-
     product := models.Product{
 		UserID:      uint(userID),
 		State:       true,
@@ -44,8 +56,7 @@ func CreateProduct(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-    cld, ctx := service.Credentials()
-    cloudinaryURL, err := service.UploadImage(cld,ctx,file)
+    cloudinaryURL, err := service.UploadImage(file)
 	if err != nil {
 		return err
 	}
