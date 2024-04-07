@@ -7,6 +7,7 @@ import (
 )
 
 func CreateUser(user *models.User) (*models.User, error) {
+
 	if err := db.DB.Create(user).Error; err != nil {
 		return nil, err
 	}
@@ -14,26 +15,57 @@ func CreateUser(user *models.User) (*models.User, error) {
 }
 
 func UpdateUser(id string, updatedUser *models.User) (*models.User, error) {
-	var existingUser models.User
-	if err := db.DB.First(&existingUser, id).Error; err != nil {
+
+	existingUser, err := GetUserByIdAuth(id)
+	if err != nil {
 		return nil, err
 	}
 
-	existingUser.Name = updatedUser.Name
-	existingUser.Email = updatedUser.Email
-	existingUser.Password = updatedUser.Password
-	existingUser.Image = updatedUser.Image
-	existingUser.Ubication = updatedUser.Ubication
+	existingUser.Name = func() string {
+		if updatedUser.Name != "" {
+			return updatedUser.Name
+		}
+		return existingUser.Name
+	}()
+
+	existingUser.Email = func() string {
+		if updatedUser.Email != "" {
+			return updatedUser.Email
+		}
+		return existingUser.Email
+	}()
+
+	existingUser.Password = func() string {
+		if updatedUser.Password != "" {
+			return updatedUser.Password
+		}
+		return existingUser.Password
+	}()
+
+	existingUser.Image = func() string {
+		if updatedUser.Image != "" {
+			return updatedUser.Image
+		}
+		return existingUser.Image
+	}()
+
+	existingUser.Ubication = func() string {
+		if updatedUser.Ubication != "" {
+			return updatedUser.Ubication
+		}
+		return existingUser.Ubication
+	}()
 
 	if err := db.DB.Save(&existingUser).Error; err != nil {
 		return nil, err
 	}
 
-	return &existingUser, nil
+	return existingUser, nil
 }
+
 func ChangeUserRole(id string, newRole models.Role) (*models.User, error) {
-	var user models.User
-	if err := db.DB.First(&user, id).Error; err != nil {
+	user, err := GetUserByIdAuth(id)
+	if err != nil {
 		return nil, err
 	}
 
@@ -48,7 +80,7 @@ func ChangeUserRole(id string, newRole models.Role) (*models.User, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 func GetUser(id string) (*models.User, error) {
 	var user models.User
@@ -58,6 +90,14 @@ func GetUser(id string) (*models.User, error) {
 	}
 	if user.ID == 0 {
 		return nil, nil
+	}
+	return &user, nil
+}
+
+func GetUserByIdAuth(idAuth string) (*models.User, error) {
+	var user models.User
+	if err := db.DB.Where("id_auth = ?", idAuth).First(&user).Error; err != nil {
+		return nil, err
 	}
 	return &user, nil
 }

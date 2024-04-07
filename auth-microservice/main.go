@@ -4,6 +4,7 @@ import (
 	"auth-microservice/db"
 	"auth-microservice/models"
 	"auth-microservice/routes"
+	"auth-microservice/services"
 	"log"
 	"net/http"
 
@@ -15,7 +16,9 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading the .env file: %v", err)
 	}
-
+	if err := services.Init(); err != nil {
+		log.Fatalf("Failed to initialize Cloudinary: %v", err)
+	}
 	db.DBConnection()
 	db.DB.AutoMigrate(&models.User{})
 
