@@ -4,7 +4,6 @@ import (
 	"auth-microservice/models"
 	"auth-microservice/services"
 	"auth-microservice/utils"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -23,7 +22,6 @@ func CreateUserHandler(c echo.Context) error {
 	}
 
 	token := authParts[1]
-	fmt.Println(token)
 	sub := utils.GetIdTokenJWTAuth0(token)
 	var user models.User
 	c.Bind(&user)

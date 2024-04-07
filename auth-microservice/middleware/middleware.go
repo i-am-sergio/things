@@ -90,8 +90,14 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			// No es necesario llamar next(c) aquí
 		}))
 		handler.ServeHTTP(c.Response(), c.Request())
-		// Este return es opcional, dependiendo de si quieres que la ejecución continúe después de este middleware o no.
-		return next(c) // Esta línea llama a la función de manejo una vez
+
+		// Si hay un error durante la validación del token JWT, retorna un error
+		if c.Response().Status == http.StatusUnauthorized {
+			return echo.NewHTTPError(http.StatusUnauthorized, "No se proporcionó un token de autorización válido")
+		}
+
+		// Si no hay errores, llama al siguiente controlador en la cadena
+		return next(c)
 	}
 }
 
