@@ -168,3 +168,16 @@ func DeleteProduct(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]string{"message": "Product and its comments deleted successfully"})
 }
+
+func Premium(c echo.Context) error {
+	id := c.Param("id")
+    var product models.Product
+    if result := db.DB.First(&product, id); result.Error != nil {
+        return c.JSON(http.StatusNotFound, map[string]string{"error": notFoundMessage})
+    }
+	product.Status = !product.Status
+	if result := db.DB.Save(&product); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": result.Error.Error()})
+	}
+	return c.JSON(http.StatusOK, product)
+}

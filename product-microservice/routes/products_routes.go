@@ -15,4 +15,6 @@ func ProductRoutes(e *echo.Echo) {
 	products.GET("/search", controllers.SearchProducts)
 	products.PUT("/:id", controllers.UpdateProduct)
 	products.DELETE("/:id", controllers.DeleteProduct)
+	products.PUT("/:id/premium", controllers.Premium)
+
 }
