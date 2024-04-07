@@ -32,21 +32,17 @@ func UpdateUser(id string, updatedUser *models.User) (*models.User, error) {
 	return &existingUser, nil
 }
 func ChangeUserRole(id string, newRole models.Role) (*models.User, error) {
-	// Buscar el usuario en la base de datos
 	var user models.User
 	if err := db.DB.First(&user, id).Error; err != nil {
 		return nil, err
 	}
 
-	// Validar que el nuevo rol sea uno de los valores permitidos
 	switch newRole {
 	case models.RoleAdmin, models.RoleUser, models.RoleEnterprise:
-		// El nuevo rol es válido
 	default:
 		return nil, errors.New("ROL NO VALIDO")
 	}
 
-	// Actualizar el rol del usuario
 	user.Role = newRole
 	if err := db.DB.Save(&user).Error; err != nil {
 		return nil, err

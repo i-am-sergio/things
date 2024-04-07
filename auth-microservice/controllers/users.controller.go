@@ -56,12 +56,13 @@ func GetUserHandler(c echo.Context) error {
 	id := c.Param("id")
 	user, err := services.GetUser(id)
 
+	if user == nil {
+		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
+	}
+
 	if err != nil {
 		return err
 	}
 
-	if user == nil {
-		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
-	}
 	return c.JSON(http.StatusOK, user)
 }
