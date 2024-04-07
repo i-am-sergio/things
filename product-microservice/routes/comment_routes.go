@@ -9,8 +9,9 @@ import (
 func CommentRoutes(e *echo.Echo) {
 	comments := e.Group("/comments")
 	comments.POST("", controllers.CreateComment)
-	comments.GET("/:id", controllers.GetCommentsByProductID)
+	comments.GET("", controllers.GetComments)
+	comments.GET("/:id", controllers.GetCommentByID)
+	comments.GET("/products/:id", controllers.GetCommentsByProductID)
 	comments.DELETE("/:id", controllers.DeleteComment)
-	//comments.PUT("/rate/:id", controllers.UpdateProductRating)
 	comments.PUT("/:id", controllers.UpdateComment)
 }

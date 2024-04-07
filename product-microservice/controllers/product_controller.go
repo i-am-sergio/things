@@ -181,3 +181,12 @@ func Premium(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, product)
 }
+
+func GetProductsPremium(c echo.Context) error {
+	var products []models.Product
+	result := db.DB.Where("status = ?", true).Find(&products)
+	if result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": errorMessage})
+	}
+	return c.JSON(http.StatusOK, products)
+}
