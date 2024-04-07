@@ -4,12 +4,21 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	"add-microservice/db"
+	"add-microservice/models"
+	"add-microservice/routes"
 )
 
 func main() {
+	db.Init()
+
+	db.DB.AutoMigrate(&models.Add{})
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		return c.String(http.StatusOK, "Hello, Proucts!")
 	})
-	e.Logger.Fatal(e.Start(":8003"))
+	routes.CommentRoutes(e)
+
+	e.Logger.Fatal(e.Start(":8002"))
 }
