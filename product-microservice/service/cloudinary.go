@@ -49,7 +49,6 @@ func UploadImage(file *multipart.FileHeader) (string, error){
 	filenameWithoutExt := filename[:len(filename)-len(filepath.Ext(filename))]
     currentTime := time.Now().Format("20060102150405")
     publicID := fmt.Sprintf("%s_%s", currentTime, filenameWithoutExt)
-    fmt.Println(publicID)
 	uploadParams := uploader.UploadParams{
         Folder:             "products/",
         PublicID:           publicID,

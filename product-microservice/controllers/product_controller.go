@@ -67,6 +67,46 @@ func CreateProduct(c echo.Context) error {
     return c.JSON(http.StatusCreated, product)
 }
 
+func UpdateProduct(c echo.Context) error {
+    id := c.Param("id")
+    var product models.Product
+    if result := db.DB.First(&product, id); result.Error != nil {
+        return c.JSON(http.StatusNotFound, map[string]string{"error": notFoundMessage})
+    }
+	form, err := c.MultipartForm()
+    if err != nil {
+        return err
+    }
+	if err := validateRequiredFields(form); err != nil {
+        return err
+    }
+    userID, err := strconv.ParseUint(form.Value["UserID"][0], 10, 32)
+	if err != nil {
+		return err
+	}
+	price, err := strconv.ParseFloat(form.Value["Price"][0], 64)
+	if err != nil {
+		return err
+	}
+	product.UserID = uint(userID)
+	product.Name = form.Value["Name"][0]
+	product.Description = form.Value["Description"][0]
+	product.Category = form.Value["Category"][0]
+	product.Price = float64(price)
+	product.Ubication = form.Value["Ubication"][0]
+	if file, err := c.FormFile("image"); err == nil {
+        cloudinaryURL, err := service.UploadImage(file)
+        if err != nil {
+            return err
+        }
+        product.Image = cloudinaryURL
+    }
+	if result := db.DB.Save(&product); result.Error != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": result.Error.Error()})
+    }
+    return c.JSON(http.StatusOK, product)
+}
+
 func GetProducts(c echo.Context) error {
 	var products []models.Product
 	result := db.DB.Find(&products)
@@ -113,18 +153,7 @@ func SearchProducts(c echo.Context) error {
     return c.JSON(http.StatusOK, products)
 }
 
-func UpdateProduct(c echo.Context) error {
-    id := c.Param("id")
-    var product models.Product
-    if result := db.DB.First(&product, id); result.Error != nil {
-        return c.JSON(http.StatusNotFound, map[string]string{"error": notFoundMessage})
-    }
-    if err := c.Bind(&product); err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": errorMessage})
-    }
-    db.DB.Save(&product)
-    return c.JSON(http.StatusOK, product)
-}
+
 
 func DeleteProduct(c echo.Context) error {
 	productID, err := strconv.Atoi(c.Param("id"))
