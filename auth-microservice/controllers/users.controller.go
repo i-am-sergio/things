@@ -27,8 +27,8 @@ func CreateUserHandler(c echo.Context) error {
 	c.Bind(&user)
 	user.IdAuth = sub
 	createdUser, err := services.CreateUser(&user)
-	if err != nil {
-		return err
+	if err != http.StatusOK {
+		return c.JSON(http.StatusInternalServerError, "OCURRIO UN ERROR")
 	}
 	return c.JSON(http.StatusCreated, createdUser)
 }
@@ -64,9 +64,9 @@ func UpdateUserHandler(c echo.Context) error {
 		}
 		updateUser.Image = cloudinaryURL
 	}
-	user, err := services.UpdateUser(id, &updateUser)
-	if err != nil {
-		return err
+	user, statusCode := services.UpdateUser(id, &updateUser)
+	if statusCode != http.StatusOK {
+		return c.JSON(http.StatusInternalServerError, "OCURRIO UN ERROR")
 	}
 	if user == nil {
 		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
@@ -82,10 +82,13 @@ func ChangeRoleHandler(c echo.Context) error {
 	if err := c.Bind(&newRole); err != nil {
 		return err
 	}
-
 	user, err := services.ChangeUserRole(id, newRole)
-	if err != nil {
-		return err
+	if err == http.StatusNotFound {
+		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
+	} else if err == http.StatusBadRequest {
+		return c.JSON(http.StatusBadRequest, "BAD REQUEST")
+	} else if err == http.StatusInternalServerError {
+		return c.JSON(http.StatusInternalServerError, "INTERNAL SERVER ERROR")
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -95,12 +98,12 @@ func GetUserHandler(c echo.Context) error {
 	id := c.Param("id")
 	user, err := services.GetUserByIdAuth(id)
 
-	if user == nil {
+	if err == http.StatusNotFound {
 		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
 	}
 
-	if err != nil {
-		return err
+	if err == http.StatusInternalServerError {
+		return c.JSON(http.StatusInternalServerError, "USER NOT FOUND")
 	}
 
 	return c.JSON(http.StatusOK, user)

@@ -125,8 +125,8 @@ func RoleMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// Obtener el usuario desde la base de datos utilizando el sub (subject)
 		user, err := services.GetUserByIdAuth(sub)
-		if err != nil {
-			return err
+		if err != http.StatusOK {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Ocurrio un error")
 		}
 
 		// Verificar el rol del usuario

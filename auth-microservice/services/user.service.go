@@ -4,21 +4,24 @@ import (
 	"auth-microservice/db"
 	"auth-microservice/models"
 	"errors"
+	"net/http"
+
+	"gorm.io/gorm"
 )
 
-func CreateUser(user *models.User) (*models.User, error) {
+func CreateUser(user *models.User) (*models.User, int) {
 
 	if err := db.DB.Create(user).Error; err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError
 	}
-	return user, nil
+	return user, http.StatusOK
 }
 
-func UpdateUser(id string, updatedUser *models.User) (*models.User, error) {
+func UpdateUser(id string, updatedUser *models.User) (*models.User, int) {
 
 	existingUser, err := GetUserByIdAuth(id)
-	if err != nil {
-		return nil, err
+	if err != http.StatusOK {
+		return nil, http.StatusInternalServerError
 	}
 
 	existingUser.Name = func() string {
@@ -57,47 +60,52 @@ func UpdateUser(id string, updatedUser *models.User) (*models.User, error) {
 	}()
 
 	if err := db.DB.Save(&existingUser).Error; err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError
 	}
 
-	return existingUser, nil
+	return existingUser, http.StatusOK
 }
 
-func ChangeUserRole(id string, newRole models.Role) (*models.User, error) {
+func ChangeUserRole(id string, newRole models.Role) (*models.User, int) {
 	user, err := GetUserByIdAuth(id)
-	if err != nil {
-		return nil, err
+	if err != http.StatusOK {
+		return nil, http.StatusInternalServerError
 	}
 
 	switch newRole {
 	case models.RoleAdmin, models.RoleUser, models.RoleEnterprise:
 	default:
-		return nil, errors.New("ROL NO VALIDO")
+		return nil, http.StatusBadRequest
 	}
-
 	user.Role = newRole
 	if err := db.DB.Save(&user).Error; err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError
 	}
 
-	return user, nil
+	return user, http.StatusOK
 }
-func GetUser(id string) (*models.User, error) {
+func GetUser(id string) (*models.User, int) {
 	var user models.User
 
 	if err := db.DB.First(&user, id).Error; err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError
 	}
 	if user.ID == 0 {
-		return nil, nil
+		return nil, http.StatusNotFound
 	}
-	return &user, nil
+	return &user, http.StatusOK
 }
 
-func GetUserByIdAuth(idAuth string) (*models.User, error) {
+func GetUserByIdAuth(idAuth string) (*models.User, int) {
 	var user models.User
 	if err := db.DB.Where("id_auth = ?", idAuth).First(&user).Error; err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// No se encontró ningún usuario con el ID de autenticación proporcionado, devolver error 404
+			return nil, http.StatusNotFound
+		}
+		// Ocurrió un error diferente, devolver error 500
+		return nil, http.StatusInternalServerError
 	}
-	return &user, nil
+	// Usuario encontrado, devolver el usuario y el código de estado 200
+	return &user, http.StatusOK
 }
