@@ -16,9 +16,9 @@ func main() {
 	db.DB.AutoMigrate(&models.Add{})
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, Proucts!")
+		return c.String(http.StatusOK, "Hello, Adds!")
 	})
 	routes.CommentRoutes(e)
 
-	e.Logger.Fatal(e.Start(":8002"))
+	e.Logger.Fatal(e.Start(":8003"))
 }

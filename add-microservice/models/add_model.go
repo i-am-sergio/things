@@ -8,10 +8,10 @@ import (
 
 type Add struct {
 	gorm.Model
-	ID        int       `json:"ID"`
-	ProductID int       `json:"productID"`
+	ProductID int       `json:"productId"`
 	Price     float64   `json:"price"`
-	Time      time.Time `json:"time"`
+	Time      int       `json:"time"`
 	Date      time.Time `json:"date"`
 	UserID    int       `json:"userId"`
+	View      int       `json:"view"`
 }

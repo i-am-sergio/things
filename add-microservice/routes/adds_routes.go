@@ -11,7 +11,7 @@ func CommentRoutes(e *echo.Echo) {
 	comments := e.Group("/adds")
 	comments.POST("", controllers.CreateAdd)
 	comments.GET("", controllers.GetAllAdds)
-	comments.GET("/:id", controllers.GetAddByID)
+	comments.GET("/:id", controllers.GetAddByIdProduct)
 	comments.PUT("/:id", controllers.UpdateAddData)
 	comments.DELETE("/:id", controllers.DeleteAddByID)
 }
