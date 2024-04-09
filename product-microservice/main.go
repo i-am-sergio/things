@@ -6,7 +6,6 @@ import (
 	"product-microservice/db"
 	"product-microservice/models"
 	"product-microservice/routes"
-	"product-microservice/service"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,7 +13,7 @@ import (
 func main() {
 	db.Init()
 	db.DB.AutoMigrate(&models.Product{}, &models.Comment{})
-	if err := service.Init(); err != nil {
+	if err := db.InitCloudinary(); err != nil {
         log.Fatalf("Failed to initialize Cloudinary: %v", err)
     }
 	e := echo.New()

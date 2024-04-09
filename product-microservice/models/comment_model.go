@@ -12,3 +12,7 @@ type Comment struct {
 	Comment   string  `validate:"required,min=1,max=1000" json:"comment"`
 	Rating    float64 `validate:"required,gte=0,lte=5" json:"rating"`
 }
+
+func (c *Comment) TableName() string {
+	return "comments"
+}

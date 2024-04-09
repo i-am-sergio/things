@@ -1,4 +1,4 @@
-package service
+package db
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 var CloudinaryInstance *cloudinary.Cloudinary
 var CloudinaryContext context.Context
 
-func Init() error {
+func InitCloudinary() error {
     err := godotenv.Load()
 	if err != nil {
 		return fmt.Errorf("error loading .env file: %w", err)
