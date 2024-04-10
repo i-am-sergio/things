@@ -45,16 +45,16 @@ func CreateProductService(form *multipart.Form, image *multipart.FileHeader) (mo
 		Ubication:   form.Value["Ubication"][0],
 		Image:       cloudinaryURL,
 	}
-	if result := db.DB.Create(&product); result.Error != nil {
-		return product, result.Error
+	if err := db.Client.Create(&product); err != nil {
+		return product, err
 	}
 	return product, nil
 }
 
 func UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
 	var product models.Product
-    if result := db.DB.First(&product, productID); result.Error != nil {
-        return product, result.Error
+    if err := db.Client.First(&product, productID); err != nil {
+        return product, err
     }
 	if err := validateRequiredFields(form); err != nil {
 		return product, err
@@ -80,24 +80,24 @@ func UpdateProductService(productID uint, form *multipart.Form, image *multipart
 		}
 		product.Image = cloudinaryURL
 	}
-	if result := db.DB.Save(&product); result.Error != nil {
-		return product, result.Error
+	if err := db.Client.Save(&product); err != nil {
+		return product, err
 	}
 	return product, nil
 }
 
 func GetProductsService() ([]models.Product, error) {
 	var products []models.Product
-	if result := db.DB.Find(&products); result.Error != nil {
-		return nil, result.Error
+	if err := db.Client.Find(&products); err != nil {
+		return nil, err
 	}
 	return products, nil
 }
 
 func GetProductByIDService(id uint) (models.Product, error) {
 	var product models.Product
-	if result := db.DB.First(&product, id); result.Error != nil {
-		return product, result.Error
+	if err := db.Client.First(&product, id); err != nil {
+		return product, err
 	}
 	return product, nil
 }
@@ -105,14 +105,14 @@ func GetProductByIDService(id uint) (models.Product, error) {
 func GetProductsByCategoryService(category string) ([]models.Product, error) {
 	var products []models.Product
 	if category != "" {
-		result := db.DB.Where("category = ?", category).Find(&products)
-		if result.Error != nil {
-			return nil, result.Error
+		err := db.Client.FindWithCondition(&products, "category = ?", category)
+		if err != nil {
+			return nil, err
 		}
 	} else {
-		result := db.DB.Find(&products)
-		if result.Error != nil {
-			return nil, result.Error
+		err := db.Client.Find(&products)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return products, nil
@@ -120,18 +120,18 @@ func GetProductsByCategoryService(category string) ([]models.Product, error) {
 
 func SearchProductsService(searchTerm string) ([]models.Product, error) {
 	var products []models.Product
-	result := db.DB.Where("name LIKE ? OR description LIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%").Find(&products)
-	if result.Error != nil {
-		return nil, result.Error
+	err := db.Client.FindWithCondition(&products, "name LIKE ? OR description LIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%")
+	if err != nil {
+		return nil, err
 	}
 	return products, nil
 }
 
 func DeleteProductService(productID uint) error {
-	if err := db.DB.Where("product_id = ?", productID).Delete(&models.Comment{}).Error; err != nil {
+	if err := db.Client.DeleteWithCondition(&models.Comment{}, "product_id = ?", productID); err != nil {
 		return err
 	}
-	if err := db.DB.Delete(&models.Product{}, productID).Error; err != nil {
+	if err := db.Client.DeleteByID(&models.Product{}, productID); err != nil {
 		return err
 	}
 	return nil
@@ -139,21 +139,21 @@ func DeleteProductService(productID uint) error {
 
 func PremiumService(productID uint) (models.Product, error) {
 	var product models.Product
-	if result := db.DB.First(&product, productID); result.Error != nil {
-		return product, result.Error
+	if err := db.Client.First(&product, productID); err != nil {
+		return product, err
 	}
 	product.Status = !product.Status
-	if result := db.DB.Save(&product); result.Error != nil {
-		return product, result.Error
+	if err := db.Client.Save(&product); err != nil {
+		return product, err
 	}
 	return product, nil
 }
 
 func GetProductsPremiumService() ([]models.Product, error) {
 	var products []models.Product
-	result := db.DB.Where("status = ?", true).Find(&products)
-	if result.Error != nil {
-		return nil, result.Error
+	err := db.Client.FindWithCondition(&products, "status = ?", true)
+	if err != nil {
+		return nil, err
 	}
 	return products, nil
 }

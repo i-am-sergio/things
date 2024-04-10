@@ -11,8 +11,10 @@ import (
 )
 
 func main() {
-	db.Init()
-	db.DB.AutoMigrate(&models.Product{}, &models.Comment{})
+	db.Init(&db.DotEnvLoader{})
+	if err := db.Client.AutoMigrate(&models.Product{}, &models.Comment{}); err != nil {
+		log.Fatalf("Error al realizar la migración: %v", err)
+	}
 	if err := db.InitCloudinary(); err != nil {
         log.Fatalf("Failed to initialize Cloudinary: %v", err)
     }

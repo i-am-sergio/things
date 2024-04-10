@@ -61,8 +61,8 @@ func UpdateComment(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
     }
     var comment models.Comment
-    if result := db.DB.First(&comment, commentID); result.Error != nil {
-        return c.JSON(http.StatusNotFound, map[string]string{"error": "Comment not found"})
+    if err := db.Client.First(&comment, commentID); err != nil {
+        return c.JSON(http.StatusNotFound, map[string]string{"error": err.Error()})
     }
     befProduct := comment.ProductID
     if err := c.Bind(&comment); err != nil {
