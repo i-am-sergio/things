@@ -21,11 +21,11 @@ func (g *GormConnector) Open(dsn string) (*gorm.DB, error) {
 }
 
 type EnvLoader interface {
-    LoadEnv() error
+    LoadEnv(filePath string) error
 }
 type DotEnvLoader struct{}
-func (d *DotEnvLoader) LoadEnv() error {
-    return godotenv.Load()
+func (d *DotEnvLoader) LoadEnv(filePath string) error {
+    return godotenv.Load(filePath)
 }
 
 type ConnectionRepository struct {
@@ -40,7 +40,7 @@ func NewConnectionRepository(envLoader EnvLoader, dbConnector DBConnector) *Conn
 }
 
 func (cr *ConnectionRepository) Init() (*gorm.DB, error) {
-	if err := cr.EnvLoader.LoadEnv(); err != nil {
+	if err := cr.EnvLoader.LoadEnv(".env"); err != nil {
         return nil, fmt.Errorf("error loading .env file: %v", err)
     }
 	DSN := os.Getenv("DB_DSN")
