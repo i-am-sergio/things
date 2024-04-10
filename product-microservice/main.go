@@ -11,7 +11,9 @@ import (
 )
 
 func main() {
-	db.Init(&db.DotEnvLoader{})
+	if err:=db.Init(&db.DotEnvLoader{},&db.GormConnector{}); err != nil {
+		log.Fatalf("Error al iniciar la base de datos: %v", err)
+	}
 	if err := db.Client.AutoMigrate(&models.Product{}, &models.Comment{}); err != nil {
 		log.Fatalf("Error al realizar la migración: %v", err)
 	}
