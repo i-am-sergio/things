@@ -7,12 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func UsersRoutes(e *echo.Echo) {
+func UsersRoutes(e *echo.Echo, uc *controllers.UserController) {
 	users := e.Group("/users")
-
-	users.POST("/", controllers.CreateUserHandler, middleware.JWTMiddleware)
-	users.GET("/:id", controllers.GetUserHandler, middleware.JWTMiddleware)
-	users.PUT("/:id", controllers.UpdateUserHandler, middleware.JWTMiddleware)
-	users.PUT("/role/:id", controllers.ChangeRoleHandler, middleware.JWTMiddleware, middleware.RoleMiddleware)
-
+	users.GET("/", uc.GetAllUsersHandler)
+	users.POST("/", uc.CreateUserHandler, middleware.JWTMiddleware)
+	users.GET("/:id", uc.GetUserHandler, middleware.JWTMiddleware)
+	users.PUT("/:id", uc.UpdateUserHandler, middleware.JWTMiddleware)
+	users.PUT("/role/:id", uc.ChangeRoleHandler, middleware.JWTMiddleware)
 }

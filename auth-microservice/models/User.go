@@ -1,10 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import "log"
 
 type User struct {
-	gorm.Model
-
 	Name      string `gorm:"not null"`
 	IdAuth    string `gorm:"not null;unique"`
 	Email     string `gorm:"not null"`
@@ -12,4 +10,8 @@ type User struct {
 	Image     string
 	Ubication string
 	Role      Role `gorm:"not null;default:USER"`
+}
+
+func (n *User) TestFunction() {
+	log.Println("This is a test function")
 }

@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"auth-microservice/services"
-	"auth-microservice/utils"
 	"context"
 	"log"
 	"net/http"
@@ -101,41 +99,41 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func RoleMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Obtener el encabezado de autorización de la solicitud
-		authHeader := c.Request().Header.Get("Authorization")
-		if authHeader == "" {
-			// Si no se proporciona un token de autorización, retorna un error
-			return echo.NewHTTPError(http.StatusUnauthorized, "Token de autorización faltante")
-		}
+// func RoleMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		// Obtener el encabezado de autorización de la solicitud
+// 		authHeader := c.Request().Header.Get("Authorization")
+// 		if authHeader == "" {
+// 			// Si no se proporciona un token de autorización, retorna un error
+// 			return echo.NewHTTPError(http.StatusUnauthorized, "Token de autorización faltante")
+// 		}
 
-		// Dividir el encabezado de autorización para obtener el token JWT
-		authParts := strings.Split(authHeader, " ")
-		if len(authParts) != 2 || authParts[0] != "Bearer" {
-			// Si el formato del encabezado de autorización no es válido, retorna un error
-			return echo.NewHTTPError(http.StatusBadRequest, "Formato de token de autorización inválido")
-		}
+// 		// Dividir el encabezado de autorización para obtener el token JWT
+// 		authParts := strings.Split(authHeader, " ")
+// 		if len(authParts) != 2 || authParts[0] != "Bearer" {
+// 			// Si el formato del encabezado de autorización no es válido, retorna un error
+// 			return echo.NewHTTPError(http.StatusBadRequest, "Formato de token de autorización inválido")
+// 		}
 
-		// Obtener el token JWT del encabezado de autorización
-		token := authParts[1]
+// 		// Obtener el token JWT del encabezado de autorización
+// 		token := authParts[1]
 
-		// Obtener el sub (subject) del token JWT
-		sub := utils.GetIdTokenJWTAuth0(token)
+// 		// Obtener el sub (subject) del token JWT
+// 		sub := utils.GetIdTokenJWTAuth0(token)
 
-		// Obtener el usuario desde la base de datos utilizando el sub (subject)
-		user, err := services.GetUserByIdAuth(sub)
-		if err != http.StatusOK {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Ocurrio un error")
-		}
+// 		// Obtener el usuario desde la base de datos utilizando el sub (subject)
+// 		user, err := services.GetUserByIdAuth(sub)
+// 		if err != http.StatusOK {
+// 			return echo.NewHTTPError(http.StatusInternalServerError, "Ocurrio un error")
+// 		}
 
-		// Verificar el rol del usuario
-		if user.Role != "ADMIN" {
-			// Si el usuario no tiene el rol de "ADMIN", retornar un error 403 (Forbidden)
-			return echo.NewHTTPError(http.StatusForbidden, "No tienes permiso para acceder a este recurso")
-		}
+// 		// Verificar el rol del usuario
+// 		if user.Role != "ADMIN" {
+// 			// Si el usuario no tiene el rol de "ADMIN", retornar un error 403 (Forbidden)
+// 			return echo.NewHTTPError(http.StatusForbidden, "No tienes permiso para acceder a este recurso")
+// 		}
 
-		// Si el usuario tiene el rol de "ADMIN", continuar con la siguiente función de middleware o controlador en la cadena
-		return next(c)
-	}
-}
+// 		// Si el usuario tiene el rol de "ADMIN", continuar con la siguiente función de middleware o controlador en la cadena
+// 		return next(c)
+// 	}
+// }
