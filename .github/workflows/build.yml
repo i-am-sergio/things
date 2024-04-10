@@ -1,0 +1,31 @@
+name: Build
+on:
+  push:
+    branches:
+      - server-iamsergio
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Change directory
+        run: cd notifications-microservice
+      - name: Install dependencies
+        run: go mod download
+        working-directory: notifications-microservice
+      - name: Test and coverage
+        run: go test ./... -coverprofile=coverage.out
+        working-directory: notifications-microservice
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_SERGIODEV }}
+        with:
+          args: >
+            -Dsonar.projectBaseDir=./notifications-microservice
