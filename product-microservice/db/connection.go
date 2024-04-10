@@ -59,7 +59,7 @@ func Init(envLoader EnvLoader, dbConnector DBConnector) error {
         return fmt.Errorf("failed to initialize database: %v", err)
     }
 	gormClient := &repository.GormDBClient{
-        DB: db,
+        DB: db,	
     }
     Client = gormClient
 	return nil
