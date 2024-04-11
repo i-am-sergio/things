@@ -27,7 +27,7 @@ GET http://localhost:8005/notifications/user/223
 
 
 ### Mark Notification As Read
-PUT http://localhost:8005/notifications/markAsRead/6614ae346a0447ad87d2a617
+PUT http://localhost:8005/notifications/markAsRead/6617f566134a2d3049987efa
 
 ### Mark All Notifications As Read
-PUT http://localhost:8005/notifications/markAllAsRead/223
+PUT http://localhost:8005/notifications/markAllAsRead/123
