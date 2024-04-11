@@ -11,17 +11,22 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
-	"github.com/joho/godotenv"
 )
 
-var CloudinaryInstance *cloudinary.Cloudinary
-var CloudinaryContext context.Context
+type CloudinaryClient interface {
+	InitCloudinary(envLoader EnvLoader) error
+	UploadImage(file *multipart.FileHeader) (string, error)
+}
 
-func InitCloudinary() error {
-    err := godotenv.Load()
+type Cloudinary struct {
+	Instance  *cloudinary.Cloudinary
+	Context   context.Context
+}
+
+func (c *Cloudinary) InitCloudinary(envLoader EnvLoader) error {
+    err := envLoader.LoadEnv(".env")
 	if err != nil {
 		return fmt.Errorf("error loading .env file: %w", err)
-		
 	}
     cloudName := os.Getenv("CLOUDINARY_CLOUD_NAME")
 	apiKey := os.Getenv("CLOUDINARY_API_KEY")
@@ -32,13 +37,12 @@ func InitCloudinary() error {
         return fmt.Errorf("error cloudinary setup: %w", err)
     }
     cld.Config.URL.Secure = true
-
-    CloudinaryInstance = cld
-	CloudinaryContext = context.Background()
+    c.Instance = cld
+	c.Context = context.Background()
     return nil
 }
 
-func UploadImage(file *multipart.FileHeader) (string, error){
+func (c *Cloudinary) UploadImage(file *multipart.FileHeader) (string, error){
 	src, err := file.Open()
     if err != nil {
         return "", err
@@ -55,8 +59,7 @@ func UploadImage(file *multipart.FileHeader) (string, error){
         UniqueFilename:     api.Bool(true),
         Overwrite:          api.Bool(true),
     }
-
-	uploadResult, err := CloudinaryInstance.Upload.Upload(CloudinaryContext, src, uploadParams)
+	uploadResult, err := c.Instance.Upload.Upload(c.Context, src, uploadParams)
     if err != nil {
         return "", err
     }

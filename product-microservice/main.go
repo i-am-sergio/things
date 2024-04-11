@@ -17,7 +17,7 @@ func main() {
 	if err := db.Client.AutoMigrate(&models.Product{}, &models.Comment{}); err != nil {
 		log.Fatalf("Error al realizar la migración: %v", err)
 	}
-	if err := db.InitCloudinary(); err != nil {
+	if err := db.InitCloudinary(&db.DotEnvLoader{}); err != nil {
         log.Fatalf("Failed to initialize Cloudinary: %v", err)
     }
 	e := echo.New()
