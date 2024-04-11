@@ -1,6 +1,7 @@
 package controllers_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -134,6 +135,39 @@ func TestGetNotificationsByUserIDService(t *testing.T) {
 	}
 	// Verify that the response matches the expected notifications
 	assert.Equal(t, expectedNotifications, responseNotifications)
+	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
+
+func TestCreateNotification_Success(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	notification := &models.NotificationModel{
+		UserID:  "1",
+		Title:   "Test Title",
+		Message: "Test Message",
+		IsRead:  false,
+	}
+	notificationJSON, _ := json.Marshal(notification)
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	// ctx.SetPath("/")
+
+	// Define the expected behavior of the mock
+	mockService.On("CreateNotificationService", ctx, notification).Return(nil)
+
+	// WHEN
+	err := controller.CreateNotification(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, rec.Code)
 	// Verify that the mock was called as expected
 	mockService.AssertExpectations(t)
 }
