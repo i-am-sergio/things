@@ -171,3 +171,57 @@ func TestCreateNotification_Success(t *testing.T) {
 	// Verify that the mock was called as expected
 	mockService.AssertExpectations(t)
 }
+
+func TestMarkAsRead_Success(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	notificationID := "123"
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("notification_id")
+	ctx.SetParamValues(notificationID)
+
+	// Define the expected behavior of the mock
+	mockService.On("MarkAsReadService", ctx, notificationID).Return(nil)
+
+	// WHEN
+	err := controller.MarkAsRead(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
+
+func TestMarkAllAsRead_Success(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	userID := "1"
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("user_id")
+	ctx.SetParamValues(userID)
+
+	// Define the expected behavior of the mock
+	mockService.On("MarkAllAsReadService", ctx, userID).Return(nil)
+
+	// WHEN
+	err := controller.MarkAllAsRead(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
