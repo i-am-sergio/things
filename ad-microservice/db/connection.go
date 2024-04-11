@@ -9,7 +9,7 @@ var DB *gorm.DB
 
 func Init() {
 	// mysql://root:wfLrySrJTJmcpoDgCryIShnfcgNrJMEW@viaduct.proxy.rlwy.net:47496/railway
-	DSN := "root:wfLrySrJTJmcpoDgCryIShnfcgNrJMEW@tcp(viaduct.proxy.rlwy.net:47496)/railway?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN := "root:HLiggebxDjXVNymFkgXGNQBOoVjgLvpi@tcp(monorail.proxy.rlwy.net:53333)/railway?charset=utf8mb4&parseTime=True&loc=Local"
 	var error error
 	DB, error = gorm.Open(mysql.Open(DSN), &gorm.Config{})
 

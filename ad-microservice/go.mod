@@ -1,4 +1,4 @@
-module add-microservice
+module ad-microservice
 
 go 1.22.2
 

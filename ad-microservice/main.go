@@ -5,9 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"add-microservice/db"
-	"add-microservice/models"
-	"add-microservice/routes"
+	"ad-microservice/db"
+	"ad-microservice/models"
+	"ad-microservice/routes"
 )
 
 func main() {
