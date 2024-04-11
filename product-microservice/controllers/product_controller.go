@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"context"
 	"mime/multipart"
 	"net/http"
+	"product-microservice/db"
 	"product-microservice/services"
 	"strconv"
 
@@ -18,7 +20,12 @@ func CreateProduct(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	product,err := services.CreateProductService(form, file)
+	cloudinaryClient := &db.Cloudinary{
+        Uploader: &db.CloudinaryUploaderAdapter{},
+        Context:  context.Background(),
+        API:      &db.CloudinaryService{},
+    }
+	product,err := services.CreateProductService(cloudinaryClient, form, file)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -39,7 +46,12 @@ func UpdateProduct(c echo.Context) error {
 	if err == nil {
 		image = file
 	}
-	product, err := services.UpdateProductService(uint(id), form, image)
+	cloudinaryClient := &db.Cloudinary{
+        Uploader: &db.CloudinaryUploaderAdapter{},
+        Context:  context.Background(),
+        API:      &db.CloudinaryService{},
+    }
+	product, err := services.UpdateProductService(cloudinaryClient, uint(id), form, image)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

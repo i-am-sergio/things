@@ -18,7 +18,7 @@ func validateRequiredFields(form *multipart.Form) error {
     return nil
 }
 
-func CreateProductService(form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
+func CreateProductService(cloudinaryClient db.CloudinaryClient, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
 	var product models.Product
 	if err := validateRequiredFields(form); err != nil {
         return product, err
@@ -31,7 +31,7 @@ func CreateProductService(form *multipart.Form, image *multipart.FileHeader) (mo
 	if err != nil {
 		return product, err
 	}
-	cloudinaryURL, err := db.UploadImage(image)
+	cloudinaryURL, err := cloudinaryClient.UploadImage(&db.MultipartFileHeaderAdapter{FileHeader: image})
 	if err != nil {
 		return product, err
 	}
@@ -51,7 +51,7 @@ func CreateProductService(form *multipart.Form, image *multipart.FileHeader) (mo
 	return product, nil
 }
 
-func UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
+func UpdateProductService(cloudinaryClient db.CloudinaryClient, productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
 	var product models.Product
     if err := db.Client.First(&product, productID); err != nil {
         return product, err
@@ -74,7 +74,7 @@ func UpdateProductService(productID uint, form *multipart.Form, image *multipart
 	product.Price = float64(price)
 	product.Ubication = form.Value["Ubication"][0]
 	if image != nil {
-		cloudinaryURL, err := db.UploadImage(image)
+		cloudinaryURL, err := cloudinaryClient.UploadImage(&db.MultipartFileHeaderAdapter{FileHeader: image})
 		if err != nil {
 			return product, err
 		}
