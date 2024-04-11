@@ -1,14 +1,11 @@
 package main
 
 import (
-	"auth-microservice/controllers"
 	"auth-microservice/db"
 	"auth-microservice/models"
-	"auth-microservice/routes"
 	"auth-microservice/services"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -40,19 +37,19 @@ func main() {
 
 	// Obtener las variables de entorno para la conexión a la base de datos
 	// dialect := "postgres"
-	dsn := "user=" + os.Getenv("DB_USER") + " password=" + os.Getenv("DB_PASSWORD") + " dbname=" + os.Getenv("DB_NAME") + " host=" + os.Getenv("DB_HOST") + " port=" + os.Getenv("DB_PORT") + " sslmode=disable"
+	//dsn := "user=" + os.Getenv("DB_USER") + " password=" + os.Getenv("DB_PASSWORD") + " dbname=" + os.Getenv("DB_NAME") + " host=" + os.Getenv("DB_HOST") + " port=" + os.Getenv("DB_PORT") + " sslmode=disable"
 
 	// Crear una instancia del repositorio
-	repo, err := services.NewRepository(dsn) // Establece el número máximo de conexiones
-	if err != nil {
-		log.Fatalf("Failed to create repository: %v", err)
-	}
+	// repo, err := services.NewRepository(dsn) // Establece el número máximo de conexiones
+	// if err != nil {
+	// 	log.Fatalf("Failed to create repository: %v", err)
+	// }
 
 	// Crear una instancia del controlador de usuario con el servicio de repositorio
-	userController := controllers.NewUserController(repo)
+	//userController := controllers.NewUserController(repo)
 
 	// Asociar las rutas de usuarios con el controlador de usuarios
-	routes.UsersRoutes(e, userController)
+	//routes.UsersRoutes(e, userController)
 
 	// Iniciar el servidor
 	e.Logger.Fatal(e.Start(":8001"))
