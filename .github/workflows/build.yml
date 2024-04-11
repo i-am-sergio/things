@@ -14,13 +14,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: Change directory
-        run: cd add-microservice
+        run: cd ad-microservice
       - name: Install dependencies
         run: go mod download
-        working-directory: add-microservice
+        working-directory: ad-microservice
       - name: Test and coverage
         run: go test ./... -coverprofile=coverage.out
-        working-directory: add-microservice
+        working-directory: ad-microservice
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -28,4 +28,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_AVELINO }}
         with:
           args: >
-            -Dsonar.projectBaseDir=./add-microservice
+            -Dsonar.projectBaseDir=./ad-microservice
