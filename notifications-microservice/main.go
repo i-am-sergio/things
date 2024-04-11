@@ -1,10 +1,11 @@
 package main
 
 import (
-	"net/http"
-	"notifications-microservice/config"
-	"notifications-microservice/db"
-	"notifications-microservice/router"
+	"notifications-microservice/src/config"
+	"notifications-microservice/src/db"
+	"notifications-microservice/src/repositories"
+	"notifications-microservice/src/router"
+	"notifications-microservice/src/services"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,13 +16,15 @@ func main() {
 
 	client := db.ConnectDB(mongoURI)
 
+	db := client.Database("notificationmcsv")
+	notificationRepo := repositories.NewNotificationRepository(db)
+	notificationService := services.NewNotificationService(notificationRepo)
+	// notificationController := controllers.NewNotificationController(notificationService)
+
 	e := echo.New()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
-	router.NotificationRoutes(e, client)
+	// Routes
+	router.NotificationRoutes(e, notificationService)
 
 	e.Logger.Fatal(e.Start(":" + port))
 }

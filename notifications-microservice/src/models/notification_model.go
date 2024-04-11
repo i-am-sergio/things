@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-type Notification struct {
+type NotificationModel struct {
+	Id        string    `json:"_id" bson:"_id"`
 	UserID    string    `json:"userId" bson:"userId"`
 	Title     string    `json:"title" bson:"title"`
 	Message   string    `json:"message" bson:"message"`
@@ -16,6 +17,6 @@ type Notification struct {
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
 
-func (n *Notification) TestFunction() {
+func (n *NotificationModel) TestFunction() {
 	fmt.Println("This is a test function")
 }

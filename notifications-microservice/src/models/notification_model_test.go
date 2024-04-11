@@ -13,7 +13,7 @@ func TestNotificationModel(t *testing.T) {
 	t.Run("TestNotificationEmptyFields", testNotificationEmptyFields)
 	t.Run("TestNotificationSerialization", testNotificationSerialization)
 
-	var notification Notification
+	var notification NotificationModel
 	notification.TestFunction()
 }
 
@@ -21,7 +21,7 @@ func testCreateNotification(t *testing.T) {
 	createdAt := time.Now()
 	updatedAt := time.Now()
 
-	notification := Notification{
+	notification := NotificationModel{
 		UserID:    "123",
 		Title:     "Test Notification",
 		Message:   "This is a test notification message",
@@ -43,7 +43,7 @@ func testCreateNotification(t *testing.T) {
 }
 
 func testNotificationEmptyFields(t *testing.T) {
-	notification := Notification{}
+	notification := NotificationModel{}
 
 	assert.Empty(t, notification.UserID)
 	assert.Empty(t, notification.Title)
@@ -57,7 +57,7 @@ func testNotificationEmptyFields(t *testing.T) {
 
 func testNotificationSerialization(t *testing.T) {
 
-	notification := Notification{
+	notification := NotificationModel{
 		UserID:  "123",
 		Title:   "Test Notification",
 		Message: "This is a test notification message",
@@ -71,7 +71,7 @@ func testNotificationSerialization(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Deserialize from JSON
-	var deserializedNotification Notification
+	var deserializedNotification NotificationModel
 	err = json.Unmarshal(jsonData, &deserializedNotification)
 	assert.NoError(t, err)
 
