@@ -18,6 +18,9 @@ type DBInterface interface {
 type GormDBClient struct {
     DB *gorm.DB
 }
+func NewGormDBClient(db *gorm.DB) *GormDBClient {
+    return &GormDBClient{DB: db}
+}
 
 func (g *GormDBClient) AutoMigrate(models ...interface{}) error {
 	return g.DB.AutoMigrate(models...)
