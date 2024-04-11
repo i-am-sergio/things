@@ -2,6 +2,8 @@ package main
 
 import (
 	"auth-microservice/controllers"
+	"auth-microservice/db"
+	"auth-microservice/models"
 	"auth-microservice/routes"
 	"auth-microservice/services"
 	"log"
@@ -25,8 +27,8 @@ func main() {
 	}
 
 	// Establecer la conexión con la base de datos
-	// db.DBConnection()
-	// db.DB.AutoMigrate(&models.User{})
+	db.DBConnection()
+	db.DB.AutoMigrate(&models.User{})
 
 	// Crear una instancia de Echo
 	e := echo.New()
@@ -37,11 +39,11 @@ func main() {
 	})
 
 	// Obtener las variables de entorno para la conexión a la base de datos
-	dialect := "postgres"
+	// dialect := "postgres"
 	dsn := "user=" + os.Getenv("DB_USER") + " password=" + os.Getenv("DB_PASSWORD") + " dbname=" + os.Getenv("DB_NAME") + " host=" + os.Getenv("DB_HOST") + " port=" + os.Getenv("DB_PORT") + " sslmode=disable"
 
 	// Crear una instancia del repositorio
-	repo, err := services.NewRepository(dialect, dsn, 10, 100) // Establece el número máximo de conexiones
+	repo, err := services.NewRepository(dsn) // Establece el número máximo de conexiones
 	if err != nil {
 		log.Fatalf("Failed to create repository: %v", err)
 	}

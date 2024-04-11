@@ -11,10 +11,10 @@ import (
 )
 
 type UserController struct {
-	UserService services.Repository
+	UserService services.RepositoryFunc
 }
 
-func NewUserController(userService services.Repository) *UserController {
+func NewUserController(userService services.RepositoryFunc) *UserController {
 	return &UserController{
 		UserService: userService,
 	}
@@ -45,7 +45,7 @@ func (uc *UserController) CreateUserHandler(c echo.Context) error {
 	c.Bind(&user)
 	user.IdAuth = sub
 	createdUser, err := uc.UserService.CreateUser(&user)
-	if err != http.StatusOK {
+	if err != http.StatusCreated {
 		return c.JSON(http.StatusInternalServerError, "OCURRIO UN ERROR")
 	}
 	return c.JSON(http.StatusCreated, createdUser)
