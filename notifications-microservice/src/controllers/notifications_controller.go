@@ -21,7 +21,7 @@ func NewNotificationController(service services.NotificationService) *Notificati
 
 func (nc *NotificationController) GetNotificationByID(c echo.Context) error {
 	notificationID := c.Param("notification_id")
-	notification, err := nc.service.GetNotificationByID(c, notificationID)
+	notification, err := nc.service.GetNotificationByIDService(c, notificationID)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, echo.Map{"error": "Notification not found"})
 	}
@@ -30,7 +30,7 @@ func (nc *NotificationController) GetNotificationByID(c echo.Context) error {
 
 func (nc *NotificationController) GetNotificationsByUserID(c echo.Context) error {
 	userID := c.Param("user_id")
-	notifications, err := nc.service.GetNotificationsByUserID(c, userID)
+	notifications, err := nc.service.GetNotificationsByUserIDService(c, userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to get notifications"})
 	}
@@ -42,7 +42,7 @@ func (nc *NotificationController) CreateNotification(c echo.Context) error {
 	if err := c.Bind(&notification); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Failed to decode request"})
 	}
-	if err := nc.service.CreateNotification(c, &notification); err != nil {
+	if err := nc.service.CreateNotificationService(c, &notification); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to create notification"})
 	}
 	return c.JSON(http.StatusCreated, echo.Map{"message": "Notification created successfully"})
@@ -50,7 +50,7 @@ func (nc *NotificationController) CreateNotification(c echo.Context) error {
 
 func (nc *NotificationController) MarkAsRead(c echo.Context) error {
 	notificationID := c.Param("notification_id")
-	if err := nc.service.MarkAsRead(c, notificationID); err != nil {
+	if err := nc.service.MarkAsReadService(c, notificationID); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to mark notification as read"})
 	}
 	return c.NoContent(http.StatusOK)
@@ -58,7 +58,7 @@ func (nc *NotificationController) MarkAsRead(c echo.Context) error {
 
 func (nc *NotificationController) MarkAllAsRead(c echo.Context) error {
 	userID := c.Param("user_id")
-	if err := nc.service.MarkAllAsRead(c, userID); err != nil {
+	if err := nc.service.MarkAllAsReadService(c, userID); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to mark all notifications as read"})
 	}
 	return c.NoContent(http.StatusOK)

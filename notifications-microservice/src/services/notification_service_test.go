@@ -44,6 +44,7 @@ func NewMockNotificationRepository() *MockNotificationRepository {
 }
 
 func TestGetNotificationByID_Success(t *testing.T) {
+	// GIVEN
 	mockRepo := new(MockNotificationRepository)
 	notificationId := "1"
 	expectedNotification := &models.NotificationModel{
@@ -55,41 +56,19 @@ func TestGetNotificationByID_Success(t *testing.T) {
 	}
 
 	service := services.NewNotificationService(mockRepo)
-
 	mockRepo.On("GetNotificationByID", mock.Anything, notificationId).Return(expectedNotification, nil)
 
-	// Execution
-	result, err := service.GetNotificationByID(nil, "1")
+	// WHEN
+	result, err := service.GetNotificationByIDService(nil, "1")
 
-	// Assertion
+	// THEN
 	assert.Nil(t, err)
 	assert.Equal(t, expectedNotification, result)
 	mockRepo.AssertExpectations(t)
 }
 
-/*
-func TestGetNotificationByID_NotFound(t *testing.T) {
-	// Configura el mock del repositorio
-	mockRepo := new(MockNotificationRepository)
-	notificationId := "1"
-	expectedErr := errors.New("Notification not found")
-
-	// Configura el servicio con el mock del repositorio
-	service := services.NewNotificationService(mockRepo)
-
-	// Configura el mock del repositorio para el escenario de not found
-	mockRepo.On("GetNotificationByID", mock.Anything, notificationId).Return(&models.NotificationModel{}, expectedErr)
-
-	// Ejecución
-	_, err := service.GetNotificationByID(nil, "1")
-
-	// Verificación
-	// assert.Nil(t, result)
-	assert.Error(t, err)
-}
-*/
-
 func TestGetNotificationsByUserID_Success(t *testing.T) {
+	// GIVEN
 	mockRepo := new(MockNotificationRepository)
 	userId := "1"
 	expectedNotifications := []models.NotificationModel{
@@ -110,19 +89,19 @@ func TestGetNotificationsByUserID_Success(t *testing.T) {
 	}
 
 	service := services.NewNotificationService(mockRepo)
-
 	mockRepo.On("GetNotificationsByUserID", mock.Anything, userId).Return(expectedNotifications, nil)
 
-	// Execution
-	result, err := service.GetNotificationsByUserID(nil, "1")
+	// WHEN
+	result, err := service.GetNotificationsByUserIDService(nil, "1")
 
-	// Assertion
+	// THEN
 	assert.Nil(t, err)
 	assert.Equal(t, expectedNotifications, result)
 	mockRepo.AssertExpectations(t)
 }
 
 func TestCreateNotification_Success(t *testing.T) {
+	// GIVEN
 	mockRepo := new(MockNotificationRepository)
 	notification := &models.NotificationModel{
 		Id:      "1",
@@ -133,45 +112,44 @@ func TestCreateNotification_Success(t *testing.T) {
 	}
 
 	service := services.NewNotificationService(mockRepo)
-
 	mockRepo.On("CreateNotification", mock.Anything, notification).Return(nil)
 
-	// Execution
-	err := service.CreateNotification(nil, notification)
+	// WHEN
+	err := service.CreateNotificationService(nil, notification)
 
-	// Assertion
+	// THEN
 	assert.Nil(t, err)
 	mockRepo.AssertExpectations(t)
 }
 
 func TestMarkAsRead_Success(t *testing.T) {
+	// GIVEN
 	mockRepo := new(MockNotificationRepository)
 	notificationId := "1"
 
 	service := services.NewNotificationService(mockRepo)
-
 	mockRepo.On("MarkAsRead", mock.Anything, notificationId).Return(nil)
 
-	// Execution
-	err := service.MarkAsRead(nil, "1")
+	// WHEN
+	err := service.MarkAsReadService(nil, "1")
 
-	// Assertion
+	// THEN
 	assert.Nil(t, err)
 	mockRepo.AssertExpectations(t)
 }
 
 func TestMarkAllAsRead_Success(t *testing.T) {
+	// GIVEN
 	mockRepo := new(MockNotificationRepository)
 	userId := "1"
 
 	service := services.NewNotificationService(mockRepo)
-
 	mockRepo.On("MarkAllAsRead", mock.Anything, userId).Return(nil)
 
-	// Execution
-	err := service.MarkAllAsRead(nil, "1")
+	// WHEN
+	err := service.MarkAllAsReadService(nil, "1")
 
-	// Assertion
+	// THEN
 	assert.Nil(t, err)
 	mockRepo.AssertExpectations(t)
 }
