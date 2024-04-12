@@ -10,7 +10,7 @@ import (
 
 func TestConnectDB(t *testing.T) {
 	// Mocking the MongoDB URI for testing
-	testURI := "mongodb://mongo:LaeqJVsbAHiyLJwAAvdEfYyUeyYfmtKo@viaduct.proxy.rlwy.net:17439"
+	testURI := "mongodb://mongo:VkUwUwbMCWFpxsVbgPAZAlCtkpQnHXCq@roundhouse.proxy.rlwy.net:39308"
 
 	client := ConnectDB(testURI)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
