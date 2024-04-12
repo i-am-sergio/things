@@ -7,46 +7,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"notifications-microservice/src/controllers"
+	"notifications-microservice/src/mocks"
 	"notifications-microservice/src/models"
 	"testing"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
-
-type mockNotificationService struct {
-	mock.Mock
-}
-
-func (m *mockNotificationService) GetNotificationByIDService(c echo.Context, id string) (*models.NotificationModel, error) {
-	args := m.Called(c, id)
-	return args.Get(0).(*models.NotificationModel), args.Error(1)
-}
-
-func (m *mockNotificationService) GetNotificationsByUserIDService(c echo.Context, id string) ([]models.NotificationModel, error) {
-	args := m.Called(c, id)
-	return args.Get(0).([]models.NotificationModel), args.Error(1)
-}
-
-func (m *mockNotificationService) CreateNotificationService(c echo.Context, notification *models.NotificationModel) error {
-	args := m.Called(c, notification)
-	return args.Error(0)
-}
-
-func (m *mockNotificationService) MarkAsReadService(c echo.Context, id string) error {
-	args := m.Called(c, id)
-	return args.Error(0)
-}
-
-func (m *mockNotificationService) MarkAllAsReadService(c echo.Context, id string) error {
-	args := m.Called(c, id)
-	return args.Error(0)
-}
 
 func TestGetNotificationByID_Success(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notificationID := "123"
 	expectedNotification := &models.NotificationModel{
 		Id:      "123",
@@ -89,7 +60,7 @@ func TestGetNotificationByID_Success(t *testing.T) {
 
 func TestGetNotificationByID_NotFound(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notificationID := "123"
 	expectedError := errors.New("Notification not found")
 
@@ -124,7 +95,7 @@ func TestGetNotificationByID_NotFound(t *testing.T) {
 
 func TestGetNotificationsByUserIDService(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	userID := "1"
 	expectedNotifications := []models.NotificationModel{
 		{
@@ -176,7 +147,7 @@ func TestGetNotificationsByUserIDService(t *testing.T) {
 
 func TestGetNotificationsByUserID_NotFound(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	userID := "1"
 	expectedError := errors.New("Failed to get notifications")
 
@@ -212,7 +183,7 @@ func TestGetNotificationsByUserID_NotFound(t *testing.T) {
 
 func TestCreateNotification_Success(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notification := &models.NotificationModel{
 		UserID:  "1",
 		Title:   "Test Title",
@@ -245,7 +216,7 @@ func TestCreateNotification_Success(t *testing.T) {
 
 func TestCreateNotification_BadRequest(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notification := &models.NotificationModel{
 		UserID:  "1",
 		Title:   "Test Title",
@@ -273,7 +244,7 @@ func TestCreateNotification_BadRequest(t *testing.T) {
 
 func TestCreateNotification_InternalServerError(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notification := &models.NotificationModel{
 		UserID:  "1",
 		Title:   "Test Title",
@@ -305,7 +276,7 @@ func TestCreateNotification_InternalServerError(t *testing.T) {
 
 func TestMarkAsRead_Success(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notificationID := "123"
 
 	controller := controllers.NewNotificationController(mockService)
@@ -332,7 +303,7 @@ func TestMarkAsRead_Success(t *testing.T) {
 
 func TestMarkAsRead_InternalServerError(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	notificationID := "123"
 
 	controller := controllers.NewNotificationController(mockService)
@@ -359,7 +330,7 @@ func TestMarkAsRead_InternalServerError(t *testing.T) {
 
 func TestMarkAllAsRead_Success(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	userID := "1"
 
 	controller := controllers.NewNotificationController(mockService)
@@ -386,7 +357,7 @@ func TestMarkAllAsRead_Success(t *testing.T) {
 
 func TestMarkAllAsRead_InternalServerError(t *testing.T) {
 	// GIVEN
-	mockService := new(mockNotificationService)
+	mockService := new(mocks.NotificationService)
 	userID := "1"
 
 	controller := controllers.NewNotificationController(mockService)
@@ -410,3 +381,36 @@ func TestMarkAllAsRead_InternalServerError(t *testing.T) {
 	// Verify that the mock was called as expected
 	mockService.AssertExpectations(t)
 }
+
+/*
+// Use this mocks in the test file if not using mockery generator
+
+type mockNotificationService struct {
+	mock.Mock
+}
+
+func (m *mockNotificationService) GetNotificationByIDService(c echo.Context, id string) (*models.NotificationModel, error) {
+	args := m.Called(c, id)
+	return args.Get(0).(*models.NotificationModel), args.Error(1)
+}
+
+func (m *mockNotificationService) GetNotificationsByUserIDService(c echo.Context, id string) ([]models.NotificationModel, error) {
+	args := m.Called(c, id)
+	return args.Get(0).([]models.NotificationModel), args.Error(1)
+}
+
+func (m *mockNotificationService) CreateNotificationService(c echo.Context, notification *models.NotificationModel) error {
+	args := m.Called(c, notification)
+	return args.Error(0)
+}
+
+func (m *mockNotificationService) MarkAsReadService(c echo.Context, id string) error {
+	args := m.Called(c, id)
+	return args.Error(0)
+}
+
+func (m *mockNotificationService) MarkAllAsReadService(c echo.Context, id string) error {
+	args := m.Called(c, id)
+	return args.Error(0)
+}
+*/

@@ -17,16 +17,19 @@ type NotificationRepository interface {
 	MarkAllAsRead(ctx echo.Context, id string) error
 }
 
+// Class ---
 type NotificationRepositoryImpl struct {
 	collection *mongo.Collection
 }
 
+// Constructor ---
 func NewNotificationRepository(db *mongo.Database) *NotificationRepositoryImpl {
 	return &NotificationRepositoryImpl{
 		collection: db.Collection("notifications"),
 	}
 }
 
+// Methods ---
 func (r *NotificationRepositoryImpl) GetNotificationByID(ctx echo.Context, id string) (*models.NotificationModel, error) {
 
 	var notification models.NotificationModel

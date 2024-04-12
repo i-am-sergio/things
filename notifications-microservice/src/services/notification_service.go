@@ -15,10 +15,12 @@ type NotificationService interface {
 	MarkAllAsReadService(ctx echo.Context, id string) error
 }
 
+// Class ---
 type NotificationServiceImpl struct {
 	repo repositories.NotificationRepository
 }
 
+// Constructor ---
 func NewNotificationService(repo repositories.NotificationRepository) *NotificationServiceImpl {
 	return &NotificationServiceImpl{
 		repo: repo,

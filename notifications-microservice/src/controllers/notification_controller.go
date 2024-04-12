@@ -9,10 +9,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Class
 type NotificationController struct {
 	service services.NotificationService
 }
 
+// Constructor ---
 func NewNotificationController(service services.NotificationService) *NotificationController {
 	return &NotificationController{service: service}
 }
