@@ -3,6 +3,7 @@ package controllers_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"notifications-microservice/src/controllers"
@@ -43,7 +44,6 @@ func (m *mockNotificationService) MarkAllAsReadService(c echo.Context, id string
 	return args.Error(0)
 }
 
-// TestGetNotificationByID_Success prueba la obtención de una notificación por su ID
 func TestGetNotificationByID_Success(t *testing.T) {
 	// GIVEN
 	mockService := new(mockNotificationService)
@@ -84,6 +84,41 @@ func TestGetNotificationByID_Success(t *testing.T) {
 	// Verify that the response matches the expected notification
 	assert.Equal(t, expectedNotification, &responseNotification)
 	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
+
+func TestGetNotificationByID_NotFound(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	notificationID := "123"
+	expectedError := errors.New("Notification not found")
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("notification_id")
+	ctx.SetParamValues(notificationID)
+
+	// Define the expected behavior of the mock
+	mockService.On("GetNotificationByIDService", ctx, notificationID).Return(&models.NotificationModel{}, expectedError)
+
+	// WHEN
+	err := controller.GetNotificationByID(ctx)
+
+	// THEN
+	assert.NoError(t, err)                         // No debería haber error en el controlador
+	assert.Equal(t, http.StatusNotFound, rec.Code) // Debería devolver un código 404
+
+	expectedResponseBody := `{"error":"Notification not found"}`
+	actualResponseBody := rec.Body.String()
+
+	// Comparar los cuerpos de respuesta decodificados de JSON como cadenas
+	assert.JSONEq(t, expectedResponseBody, actualResponseBody)
+
+	// Verificar que el servicio mock fue llamado como se esperaba
 	mockService.AssertExpectations(t)
 }
 
@@ -139,6 +174,42 @@ func TestGetNotificationsByUserIDService(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
+func TestGetNotificationsByUserID_NotFound(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	userID := "1"
+	expectedError := errors.New("Failed to get notifications")
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("user_id")
+	ctx.SetParamValues(userID)
+
+	// Define the expected behavior of the mock
+	mockService.On("GetNotificationsByUserIDService", ctx, userID).Return([]models.NotificationModel{}, expectedError)
+
+	// WHEN
+	err := controller.GetNotificationsByUserID(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+
+	expectedResponseBody := `{"error":"Failed to get notifications"}`
+	actualResponseBody := rec.Body.String()
+
+	// Comparar los cuerpos de respuesta decodificados de JSON como cadenas
+	assert.JSONEq(t, expectedResponseBody, actualResponseBody)
+
+	// Verificar que el servicio mock fue llamado como se esperaba
+	mockService.AssertExpectations(t)
+
+}
+
 func TestCreateNotification_Success(t *testing.T) {
 	// GIVEN
 	mockService := new(mockNotificationService)
@@ -172,6 +243,66 @@ func TestCreateNotification_Success(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
+func TestCreateNotification_BadRequest(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	notification := &models.NotificationModel{
+		UserID:  "1",
+		Title:   "Test Title",
+		Message: "Test Message",
+		IsRead:  false,
+	}
+	notificationJSON, _ := json.Marshal(notification)
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	// WHEN
+	err := controller.CreateNotification(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	// Verify that the mock was not called
+	mockService.AssertNotCalled(t, "CreateNotificationService", ctx, notification)
+}
+
+func TestCreateNotification_InternalServerError(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	notification := &models.NotificationModel{
+		UserID:  "1",
+		Title:   "Test Title",
+		Message: "Test Message",
+		IsRead:  false,
+	}
+	notificationJSON, _ := json.Marshal(notification)
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+
+	// Define the expected behavior of the mock
+	mockService.On("CreateNotificationService", ctx, notification).Return(errors.New("Failed to create notification"))
+
+	// WHEN
+	err := controller.CreateNotification(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
+
 func TestMarkAsRead_Success(t *testing.T) {
 	// GIVEN
 	mockService := new(mockNotificationService)
@@ -199,6 +330,33 @@ func TestMarkAsRead_Success(t *testing.T) {
 	mockService.AssertExpectations(t)
 }
 
+func TestMarkAsRead_InternalServerError(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	notificationID := "123"
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("notification_id")
+	ctx.SetParamValues(notificationID)
+
+	// Define the expected behavior of the mock
+	mockService.On("MarkAsReadService", ctx, notificationID).Return(errors.New("Failed to mark notification as read"))
+
+	// WHEN
+	err := controller.MarkAsRead(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
+
 func TestMarkAllAsRead_Success(t *testing.T) {
 	// GIVEN
 	mockService := new(mockNotificationService)
@@ -222,6 +380,33 @@ func TestMarkAllAsRead_Success(t *testing.T) {
 	// THEN
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
+	// Verify that the mock was called as expected
+	mockService.AssertExpectations(t)
+}
+
+func TestMarkAllAsRead_InternalServerError(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	userID := "1"
+
+	controller := controllers.NewNotificationController(mockService)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("user_id")
+	ctx.SetParamValues(userID)
+
+	// Define the expected behavior of the mock
+	mockService.On("MarkAllAsReadService", ctx, userID).Return(errors.New("Failed to mark all notifications as read"))
+
+	// WHEN
+	err := controller.MarkAllAsRead(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	// Verify that the mock was called as expected
 	mockService.AssertExpectations(t)
 }
