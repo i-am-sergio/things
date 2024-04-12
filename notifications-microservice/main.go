@@ -11,23 +11,24 @@ import (
 )
 
 func main() {
+	e, port := initializeApp()
+	e.Logger.Fatal(e.Start(":" + port))
+}
 
+func initializeApp() (*echo.Echo, string) {
 	port, mongoURI, err := config.LoadSecrets()
-
 	if err != nil {
 		panic(err)
 	}
 
 	client := db.ConnectDB(mongoURI)
-
 	db := client.Database("notificationmcsv")
+
 	notificationRepo := repositories.NewNotificationRepository(db)
 	notificationService := services.NewNotificationService(notificationRepo)
 
 	e := echo.New()
-
-	// Routes
 	router.NotificationRoutes(e, notificationService)
 
-	e.Logger.Fatal(e.Start(":" + port))
+	return e, port
 }
