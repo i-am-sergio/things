@@ -11,19 +11,19 @@ import (
 )
 
 type UserController struct {
-	UserService services.RepositoryFunc
+	UserService services.UserServiceImpl
 }
 
-func NewUserController(userService services.RepositoryFunc) *UserController {
+func NewUserController(userService services.UserServiceImpl) *UserController {
 	return &UserController{
 		UserService: userService,
 	}
 }
 
 func (uc *UserController) GetAllUsersHandler(c echo.Context) error {
-	users, err := uc.UserService.GetAllUsers()
-	if err != http.StatusOK {
-		return c.JSON(err, nil)
+	users, err := uc.UserService.GetAllUsersService(c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, nil)
 	}
 	return c.JSON(http.StatusOK, users)
 }
@@ -44,9 +44,9 @@ func (uc *UserController) CreateUserHandler(c echo.Context) error {
 	var user models.User
 	c.Bind(&user)
 	user.IdAuth = sub
-	createdUser, err := uc.UserService.CreateUser(&user)
-	if err != http.StatusCreated {
-		return c.JSON(http.StatusInternalServerError, "OCURRIO UN ERROR")
+	createdUser, err := uc.UserService.CreateUserService(c.Request().Context(), &user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, nil)
 	}
 	return c.JSON(http.StatusCreated, createdUser)
 }
@@ -82,12 +82,12 @@ func (uc *UserController) UpdateUserHandler(c echo.Context) error {
 		}
 		updateUser.Image = cloudinaryURL
 	}
-	user, statusCode := uc.UserService.UpdateUser(id, &updateUser)
-	if statusCode != http.StatusOK {
-		return c.JSON(http.StatusInternalServerError, "OCURRIO UN ERROR")
+	user, statusCode := uc.UserService.UpdateUserService(c.Request().Context(), id, &updateUser)
+	if statusCode != nil {
+		return c.JSON(http.StatusInternalServerError, nil)
 	}
 	if user == nil {
-		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
+		return c.JSON(http.StatusNotFound, nil)
 	}
 	return c.JSON(http.StatusOK, user)
 }
@@ -100,28 +100,19 @@ func (uc *UserController) ChangeRoleHandler(c echo.Context) error {
 	if err := c.Bind(&newRole); err != nil {
 		return err
 	}
-	user, err := uc.UserService.ChangeUserRole(id, newRole)
-	if err == http.StatusNotFound {
-		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
-	} else if err == http.StatusBadRequest {
-		return c.JSON(http.StatusBadRequest, "BAD REQUEST")
-	} else if err == http.StatusInternalServerError {
-		return c.JSON(http.StatusInternalServerError, "INTERNAL SERVER ERROR")
+	user, err := uc.UserService.ChangeUserRoleService(c.Request().Context(), id, newRole)
+	if err == nil {
+		return c.JSON(http.StatusNotFound, nil)
 	}
-
 	return c.JSON(http.StatusOK, user)
 }
 
 func (uc *UserController) GetUserHandler(c echo.Context) error {
 	id := c.Param("id")
-	user, err := uc.UserService.GetUserByIdAuth(id)
+	user, err := uc.UserService.GetUserByIdAuthService(c.Request().Context(), id)
 
-	if err == http.StatusNotFound {
+	if err == nil {
 		return c.JSON(http.StatusNotFound, "USER NOT FOUND")
-	}
-
-	if err == http.StatusInternalServerError {
-		return c.JSON(http.StatusInternalServerError, "USER NOT FOUND")
 	}
 
 	return c.JSON(http.StatusOK, user)
