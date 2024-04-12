@@ -18,6 +18,9 @@
 - **test**: For adding or modifying tests.
   - Example: `test: Add unit tests for authentication function`
 
+- **refactor**: For refactoring file structure or folders.
+  - Example: `refactor: Quit user-microservice folder of my branch`
+
 - **config**: For maintenance tasks, such as dependency updates, configurations, etc.
   - Example: `chore: Update Maven dependencies`
 
@@ -26,3 +29,4 @@
 
 - **format**: For changes that do not affect the code behavior (e.g., formatting, whitespace, etc.).
   - Example: `format: Format code according to style conventions`
+
