@@ -18,7 +18,8 @@ func main() {
 		log.Fatalf("Error al realizar la migración: %v", err)
 	}
 	cloudinary := &db.Cloudinary{
-        API: &db.CloudinaryService{},
+        Uploader: &db.CloudinaryUploaderAdapter{},
+        API:      &db.CloudinaryService{},
     }
 	if err := cloudinary.InitCloudinary(&db.DotEnvLoader{}); err != nil {
         log.Fatalf("Failed to initialize Cloudinary: %v", err)
@@ -27,7 +28,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Proucts!")
 	})
-	routes.ProductRoutes(e)
+	routes.ProductRoutes(e, cloudinary)
 	routes.CommentRoutes(e)
 	e.Logger.Fatal(e.Start(":8002"))
 }

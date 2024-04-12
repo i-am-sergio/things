@@ -48,7 +48,6 @@ func TestDotEnvLoaderLoadEnv(t *testing.T) {
 	assert.Equal(t, "success", val, "Expected TEST_VAR to be 'success'")
 }
 
-
 func TestGormDBClientInit(t *testing.T) {
 	t.Run("SuccessfulInitialization", func(t *testing.T) {
 		mockEnvLoader := new(MockEnvLoader)

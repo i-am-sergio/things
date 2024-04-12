@@ -28,11 +28,7 @@ type CloudinaryUploaderAdapter struct {
 	Cld *cloudinary.Cloudinary
 }
 func (cua *CloudinaryUploaderAdapter) Upload(ctx context.Context, file multipart.File, params uploader.UploadParams) (*uploader.UploadResult, error) {
-	uploadResult, err := cua.Cld.Upload.Upload(ctx, file, params)
-	if err != nil {
-		return nil, err
-	}
-	return uploadResult, nil
+	return cua.Cld.Upload.Upload(ctx, file, params)
 }
 
 type FileHeaderWrapper interface {

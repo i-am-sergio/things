@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const image = "example.jpg"
 const example = "https://example.com/image.jpg"
 
 type MockCloudinaryAPI struct {
@@ -42,6 +43,40 @@ func (m *MockFileHeaderWrapper) Open() (multipart.File, error) {
 func (m *MockFileHeaderWrapper) Filename() string {
     args := m.Called()
     return args.String(0)
+}
+
+func TestNewFromParams(t *testing.T) {
+	cloud := CloudinaryService{}
+	_, err := cloud.NewFromParams("testCloudName", "testAPIKey", "testAPISecret")
+	require.NoError(t, err)
+}
+
+func TestUpload(t *testing.T) {
+	adapter := &CloudinaryUploaderAdapter{
+		Cld: &cloudinary.Cloudinary{},
+	}
+	file := &os.File{}
+	params := uploader.UploadParams{
+		Folder: "testFolder",
+	}
+	_, err := adapter.Upload(context.Background(), file, params)
+	require.Error(t, err)
+}
+
+func TestOpen(t *testing.T) {
+	adapter := &MultipartFileHeaderAdapter{
+		&multipart.FileHeader{},
+	}
+	_, err := adapter.Open()
+	require.Error(t, err)
+}
+
+func TestFilename(t *testing.T) {
+	adapter := &MultipartFileHeaderAdapter{
+		&multipart.FileHeader{Filename: "test.jpg"},
+	}
+	filename := adapter.Filename()
+	assert.Equal(t, "test.jpg", filename)
 }
 
 func TestInitCloudinarySuccess(t *testing.T) {
@@ -110,7 +145,7 @@ func TestUploadImage(t *testing.T) {
 		mockFileHeaderWrapper := new(MockFileHeaderWrapper)
         file := &os.File{}
         mockFileHeaderWrapper.On("Open").Return(file, nil)
-        mockFileHeaderWrapper.On("Filename").Return("example.jpg")
+        mockFileHeaderWrapper.On("Filename").Return(image)
 		cloudinary := Cloudinary{
 			Uploader: mockUploader,
 			Context:  context.Background(),
@@ -145,7 +180,7 @@ func TestUploadImage(t *testing.T) {
 		mockFileHeaderWrapper := new(MockFileHeaderWrapper)
         file := &os.File{}
         mockFileHeaderWrapper.On("Open").Return(file, nil)
-        mockFileHeaderWrapper.On("Filename").Return("example.jpg")
+        mockFileHeaderWrapper.On("Filename").Return(image)
 		cloudinary := Cloudinary{
 			Uploader: mockUploader,
 			Context:  context.Background(),
