@@ -12,14 +12,17 @@ import (
 
 func main() {
 
-	port, mongoURI := config.LoadSecrets()
+	port, mongoURI, err := config.LoadSecrets()
+
+	if err != nil {
+		panic(err)
+	}
 
 	client := db.ConnectDB(mongoURI)
 
 	db := client.Database("notificationmcsv")
 	notificationRepo := repositories.NewNotificationRepository(db)
 	notificationService := services.NewNotificationService(notificationRepo)
-	// notificationController := controllers.NewNotificationController(notificationService)
 
 	e := echo.New()
 

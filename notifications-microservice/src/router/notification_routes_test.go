@@ -41,8 +41,6 @@ func (m *mockNotificationService) MarkAllAsReadService(c echo.Context, id string
 	return args.Error(0)
 }
 
-// Otras implementaciones de métodos de servicio mock...
-
 func TestGetNotificationByIDRoute_Success(t *testing.T) {
 	// GIVEN
 	mockService := new(mockNotificationService)
@@ -118,6 +116,56 @@ func TestCreateNotificationRoute_Success(t *testing.T) {
 	// THEN
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, rec.Code)
+
+	// Verificar que el servicio mock fue llamado como se esperaba
+	mockService.AssertExpectations(t)
+}
+
+func TestMarkAsReadSRoute_Success(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	controller := controllers.NewNotificationController(mockService)
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/notifications/123", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("notification_id")
+	ctx.SetParamValues("123")
+
+	// Define el comportamiento esperado del servicio mock
+	mockService.On("MarkAsReadService", ctx, "123").Return(nil)
+
+	// WHEN
+	err := controller.MarkAsRead(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	// Verificar que el servicio mock fue llamado como se esperaba
+	mockService.AssertExpectations(t)
+}
+
+func TestMarkAllAsReadRoute_Success(t *testing.T) {
+	// GIVEN
+	mockService := new(mockNotificationService)
+	controller := controllers.NewNotificationController(mockService)
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/notifications/user/1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("user_id")
+	ctx.SetParamValues("1")
+
+	// Define el comportamiento esperado del servicio mock
+	mockService.On("MarkAllAsReadService", ctx, "1").Return(nil)
+
+	// WHEN
+	err := controller.MarkAllAsRead(ctx)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
 
 	// Verificar que el servicio mock fue llamado como se esperaba
 	mockService.AssertExpectations(t)
