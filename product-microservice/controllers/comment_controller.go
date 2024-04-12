@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"product-microservice/db"
 	"product-microservice/models"
 	"product-microservice/services"
 	"strconv"
@@ -12,74 +11,89 @@ import (
 
 const invalidCommentIDError = "Invalid comment ID"
 
-func CreateComment(c echo.Context) error {
+type CommentController interface {
+    CreateComment(c echo.Context) error
+    GetComments(c echo.Context) error
+    GetCommentByID(c echo.Context) error
+    GetCommentsByProductID(c echo.Context) error
+    UpdateComment(c echo.Context) error
+    DeleteComment(c echo.Context) error
+}
+type CommentControllerImpl struct {
+    CommentService services.CommentService
+}
+func NewCommentController(commentService services.CommentService) *CommentControllerImpl {
+    return &CommentControllerImpl{CommentService: commentService}
+}
+
+func (cx *CommentControllerImpl) CreateComment(c echo.Context) error {
     var comment models.Comment
     if err := c.Bind(&comment); err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
     }
-    if err := services.CreateCommentService(comment); err != nil {
+    if err := cx.CommentService.CreateCommentService(comment); err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
     }
     return c.JSON(http.StatusCreated, comment)
 }
 
-func GetComments(c echo.Context) error {
-    comments, err := services.GetCommentsService()
+func (cx *CommentControllerImpl) GetComments(c echo.Context) error {
+    comments, err := cx.CommentService.GetCommentsService()
     if err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
     }
     return c.JSON(http.StatusOK, comments)
 }
 
-func GetCommentByID(c echo.Context) error {
+func (cx *CommentControllerImpl) GetCommentByID(c echo.Context) error {
     ID, err := strconv.Atoi(c.Param("id")) 
     if err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
     }
-    getComment, err := services.GetCommentByIDService(uint(ID))
+    getComment, err := cx.CommentService.GetCommentByIDService(uint(ID))
     if err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
     }
     return c.JSON(http.StatusOK, getComment)
 }
 
-func GetCommentsByProductID(c echo.Context) error {
+func (cx *CommentControllerImpl) GetCommentsByProductID(c echo.Context) error {
     ID, err := strconv.Atoi(c.Param("id")) 
     if err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
     }
-    comments, err := services.GetCommentsByProductIDService(uint(ID))
+    comments, err := cx.CommentService.GetCommentsByProductIDService(uint(ID))
     if err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
     }
     return c.JSON(http.StatusOK, comments)
 }
 
-func UpdateComment(c echo.Context) error {
+func (cx *CommentControllerImpl) UpdateComment(c echo.Context) error {
     commentID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
     }
-    var comment models.Comment
-    if err := db.Client.First(&comment, commentID); err != nil {
+    comment, err := cx.CommentService.GetCommentByIDService(uint(commentID))
+    if err != nil {
         return c.JSON(http.StatusNotFound, map[string]string{"error": err.Error()})
     }
     befProduct := comment.ProductID
     if err := c.Bind(&comment); err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
     }
-    if err := services.UpdateCommentService(comment, uint(befProduct)); err != nil {
+    if err := cx.CommentService.UpdateCommentService(comment, uint(befProduct)); err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
     }
     return c.JSON(http.StatusOK, comment)
 }
 
-func DeleteComment(c echo.Context) error {
+func (cx *CommentControllerImpl) DeleteComment(c echo.Context) error {
     commentID, err := strconv.Atoi(c.Param("id"))
     if err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
     }
-    if err := services.DeleteCommentService(uint(commentID)); err != nil {
+    if err := cx.CommentService.DeleteCommentService(uint(commentID)); err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
     }
     return c.JSON(http.StatusOK, map[string]string{"message": "Comment deleted"})

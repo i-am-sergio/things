@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"product-microservice/controllers"
 	"product-microservice/db"
 	"product-microservice/models"
 	"product-microservice/routes"
+	"product-microservice/services"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,7 +30,11 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Proucts!")
 	})
-	routes.ProductRoutes(e, cloudinary)
-	routes.CommentRoutes(e)
+	productService := services.NewProductService(db.Client, cloudinary)
+	commentService := services.NewCommentService(db.Client)
+	productController := controllers.NewProductController(productService)
+	commentController := controllers.NewCommentController(commentService)
+	routes.ProductRoutes(e, productController)
+	routes.CommentRoutes(e, commentController)
 	e.Logger.Fatal(e.Start(":8002"))
 }

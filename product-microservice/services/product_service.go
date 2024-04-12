@@ -5,8 +5,28 @@ import (
 	"mime/multipart"
 	"product-microservice/db"
 	"product-microservice/models"
+	"product-microservice/repository"
 	"strconv"
 )
+
+type ProductService interface {
+	CreateProductService(form *multipart.Form, image *multipart.FileHeader) (models.Product, error)
+	UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error)
+	GetProductsService() ([]models.Product, error)
+	GetProductByIDService(id uint) (models.Product, error)
+	GetProductsByCategoryService(category string) ([]models.Product, error)
+	SearchProductsService(searchTerm string) ([]models.Product, error)
+	DeleteProductService(productID uint) error
+	PremiumService(productID uint) (models.Product, error)
+	GetProductsPremiumService() ([]models.Product, error)
+}
+type ProductServiceImpl struct {
+	dbClient repository.DBInterface
+	cloudinaryClient db.CloudinaryClient
+}
+func NewProductService(client repository.DBInterface, cloudinary db.CloudinaryClient) *ProductServiceImpl {
+	return &ProductServiceImpl{dbClient: client, cloudinaryClient: cloudinary}
+}
 
 func validateRequiredFields(form *multipart.Form) error {
     requiredFields := []string{"UserID", "Price", "Name", "Description", "Category", "Ubication"}
@@ -18,7 +38,7 @@ func validateRequiredFields(form *multipart.Form) error {
     return nil
 }
 
-func CreateProductService(cloudinaryClient db.CloudinaryClient, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
+func (c *ProductServiceImpl) CreateProductService(form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
 	var product models.Product
 	if err := validateRequiredFields(form); err != nil {
         return product, err
@@ -31,7 +51,7 @@ func CreateProductService(cloudinaryClient db.CloudinaryClient, form *multipart.
 	if err != nil {
 		return product, err
 	}
-	cloudinaryURL, err := cloudinaryClient.UploadImage(&db.MultipartFileHeaderAdapter{FileHeader: image})
+	cloudinaryURL, err := c.cloudinaryClient.UploadImage(&db.MultipartFileHeaderAdapter{FileHeader: image})
 	if err != nil {
 		return product, err
 	}
@@ -45,13 +65,13 @@ func CreateProductService(cloudinaryClient db.CloudinaryClient, form *multipart.
 		Ubication:   form.Value["Ubication"][0],
 		Image:       cloudinaryURL,
 	}
-	if err := db.Client.Create(&product); err != nil {
+	if err := c.dbClient.Create(&product); err != nil {
 		return product, err
 	}
 	return product, nil
 }
 
-func UpdateProductService(cloudinaryClient db.CloudinaryClient, productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
+func (c *ProductServiceImpl) UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
 	var product models.Product
     if err := db.Client.First(&product, productID); err != nil {
         return product, err
@@ -74,43 +94,43 @@ func UpdateProductService(cloudinaryClient db.CloudinaryClient, productID uint, 
 	product.Price = float64(price)
 	product.Ubication = form.Value["Ubication"][0]
 	if image != nil {
-		cloudinaryURL, err := cloudinaryClient.UploadImage(&db.MultipartFileHeaderAdapter{FileHeader: image})
+		cloudinaryURL, err := c.cloudinaryClient.UploadImage(&db.MultipartFileHeaderAdapter{FileHeader: image})
 		if err != nil {
 			return product, err
 		}
 		product.Image = cloudinaryURL
 	}
-	if err := db.Client.Save(&product); err != nil {
+	if err := c.dbClient.Save(&product); err != nil {
 		return product, err
 	}
 	return product, nil
 }
 
-func GetProductsService() ([]models.Product, error) {
+func (c *ProductServiceImpl) GetProductsService() ([]models.Product, error) {
 	var products []models.Product
-	if err := db.Client.Find(&products); err != nil {
+	if err := c.dbClient.Find(&products); err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-func GetProductByIDService(id uint) (models.Product, error) {
+func (c *ProductServiceImpl) GetProductByIDService(id uint) (models.Product, error) {
 	var product models.Product
-	if err := db.Client.First(&product, id); err != nil {
+	if err := c.dbClient.First(&product, id); err != nil {
 		return product, err
 	}
 	return product, nil
 }
 
-func GetProductsByCategoryService(category string) ([]models.Product, error) {
+func (c *ProductServiceImpl) GetProductsByCategoryService(category string) ([]models.Product, error) {
 	var products []models.Product
 	if category != "" {
-		err := db.Client.FindWithCondition(&products, "category = ?", category)
+		err := c.dbClient.FindWithCondition(&products, "category = ?", category)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		err := db.Client.Find(&products)
+		err := c.dbClient.Find(&products)
 		if err != nil {
 			return nil, err
 		}
@@ -118,40 +138,40 @@ func GetProductsByCategoryService(category string) ([]models.Product, error) {
 	return products, nil
 }
 
-func SearchProductsService(searchTerm string) ([]models.Product, error) {
+func (c *ProductServiceImpl) SearchProductsService(searchTerm string) ([]models.Product, error) {
 	var products []models.Product
-	err := db.Client.FindWithCondition(&products, "name LIKE ? OR description LIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%")
+	err := c.dbClient.FindWithCondition(&products, "name LIKE ? OR description LIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%")
 	if err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-func DeleteProductService(productID uint) error {
-	if err := db.Client.DeleteWithCondition(&models.Comment{}, "product_id = ?", productID); err != nil {
+func (c *ProductServiceImpl) DeleteProductService(productID uint) error {
+	if err := c.dbClient.DeleteWithCondition(&models.Comment{}, "product_id = ?", productID); err != nil {
 		return err
 	}
-	if err := db.Client.DeleteByID(&models.Product{}, productID); err != nil {
+	if err := c.dbClient.DeleteByID(&models.Product{}, productID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func PremiumService(productID uint) (models.Product, error) {
+func (c *ProductServiceImpl) PremiumService(productID uint) (models.Product, error) {
 	var product models.Product
-	if err := db.Client.First(&product, productID); err != nil {
+	if err := c.dbClient.First(&product, productID); err != nil {
 		return product, err
 	}
 	product.Status = !product.Status
-	if err := db.Client.Save(&product); err != nil {
+	if err := c.dbClient.Save(&product); err != nil {
 		return product, err
 	}
 	return product, nil
 }
 
-func GetProductsPremiumService() ([]models.Product, error) {
+func (c *ProductServiceImpl) GetProductsPremiumService() ([]models.Product, error) {
 	var products []models.Product
-	err := db.Client.FindWithCondition(&products, "status = ?", true)
+	err := c.dbClient.FindWithCondition(&products, "status = ?", true)
 	if err != nil {
 		return nil, err
 	}

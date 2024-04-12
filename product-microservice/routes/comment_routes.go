@@ -6,12 +6,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CommentRoutes(e *echo.Echo) {
+func CommentRoutes(e *echo.Echo, c controllers.CommentController) {
 	comments := e.Group("/comments")
-	comments.POST("", controllers.CreateComment)
-	comments.GET("", controllers.GetComments)
-	comments.GET("/:id", controllers.GetCommentByID)
-	comments.GET("/products/:id", controllers.GetCommentsByProductID)
-	comments.DELETE("/:id", controllers.DeleteComment)
-	comments.PUT("/:id", controllers.UpdateComment)
+	comments.POST("", c.CreateComment)
+	comments.GET("", c.GetComments)
+	comments.GET("/:id", c.GetCommentByID)
+	comments.GET("/products/:id", c.GetCommentsByProductID)
+	comments.DELETE("/:id", c.DeleteComment)
+	comments.PUT("/:id", c.UpdateComment)
 }
