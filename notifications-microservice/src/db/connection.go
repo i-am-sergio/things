@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ConnectDB(uri string) *mongo.Client {
+func ConnectDB(uri string) (*mongo.Client, error) {
 	// Set client options
 	clientOptions := options.Client().ApplyURI(uri)
 
@@ -19,10 +19,6 @@ func ConnectDB(uri string) *mongo.Client {
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(ctx, clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	log.Println("Connected to MongoDB!")
-	return client
+	return client, err
 }
