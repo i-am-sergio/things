@@ -32,8 +32,8 @@ func (s *NotificationServiceImpl) GetNotificationByIDService(ctx echo.Context, i
 	return s.repo.GetNotificationByID(ctx, id)
 }
 
-func (s *NotificationServiceImpl) GetNotificationsByUserIDService(ctx echo.Context, id string) ([]models.NotificationModel, error) {
-	return s.repo.GetNotificationsByUserID(ctx, id)
+func (s *NotificationServiceImpl) GetNotificationsByUserIDService(ctx echo.Context, userId string) ([]models.NotificationModel, error) {
+	return s.repo.GetNotificationsByUserID(ctx, userId)
 }
 
 func (s *NotificationServiceImpl) CreateNotificationService(ctx echo.Context, notification *models.NotificationModel) error {

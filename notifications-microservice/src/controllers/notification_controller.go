@@ -65,28 +65,3 @@ func (nc *NotificationController) MarkAllAsRead(c echo.Context) error {
 	}
 	return c.NoContent(http.StatusOK)
 }
-
-/*
-// MarkAsRead marca una notificación como leída
-func MarkAsRead(client *mongo.Client) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		notificationID := c.Param("notification_id")
-		if err := services.MarkAsReadService(notificationID, client); err != nil {
-			return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to mark notification as read"})
-		}
-		return c.NoContent(http.StatusOK)
-	}
-}
-
-// MarkAllAsRead marca todas las notificaciones como leídas para un usuario específico
-func MarkAllAsRead(client *mongo.Client) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		userID := c.Param("user_id")
-		if err := services.MarkAllAsReadService(userID, client); err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to mark all notifications as read"})
-		}
-		return c.NoContent(http.StatusOK)
-	}
-}
-
-*/

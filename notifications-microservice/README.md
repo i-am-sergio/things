@@ -8,7 +8,25 @@
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 ![SonarCloud](https://img.shields.io/badge/Sonar%20cloud-F3702A?style=for-the-badge&logo=sonarcloud&logoColor=white)
 
-This document outlines the endpoints provided by the Notification Microservice implemented in Golang.
+## **Dependencies**
+
+- [**github.com/joho/godotenv**](https://github.com/joho/godotenv) v1.5.1
+  - **Description:** `godotenv` is a Go package that loads environment variables from a `.env` file into the process environment.
+  - **Usage in Project:** Used for loading environment variables from `.env` files to configure the application.
+
+- [**github.com/labstack/echo/v4**](https://github.com/labstack/echo/v4) v4.11.4
+  - **Description:** `echo` is a high-performance, minimalist web framework for Go. Version 4 is a major release with significant improvements and changes over previous versions.
+  - **Usage in Project:** Used for defining routes, handling HTTP requests, and building RESTful APIs.
+
+- [**github.com/stretchr/testify**](https://github.com/stretchr/testify) v1.9.0
+  - **Description:** `testify` is a toolkit with common assertions and mocks that plays nicely with the standard Go testing package.
+  - **Usage in Project:** Used for writing unit tests and assertions in tests for the application.
+
+- [**go.mongodb.org/mongo-driver**](https://go.mongodb.org/mongo-driver) v1.14.0
+  - **Description:** `mongo-driver` is the official Go driver for MongoDB. It provides tools for interacting with MongoDB databases from Go applications.
+  - **Usage in Project:** Used for connecting to MongoDB databases, performing CRUD operations, and interacting with MongoDB collections.
+
+
 
 ## **Endpoints**
 
@@ -65,3 +83,13 @@ This document outlines the endpoints provided by the Notification Microservice i
 - **Response:**
   - Status Code: 200 OK
 
+## **Dockerization**
+
+- **Build Image:** Run the following command:
+  ```bash
+  docker build -t notifications-mcsv .
+  ```
+- **Run App Container:** Run the following command:
+  ```bash
+  docker run -d -p 8005:8005 notifications-mcsv
+  ```

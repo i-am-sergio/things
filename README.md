@@ -9,8 +9,8 @@
 
 ## ***Server Endpoints***
 
-### 1. ***[Auth & Users Microservice Endpoints](./notifications-microservice/README.md)***
-### 2. ***[Products Microservice Endpoints](documentation.md)***
-### 3. ***[Ad Microservice Endpoints](documentation.md)***
-### 4. ***[Chat Microservice Endpoints](documentation.md)***
-### 5. ***[Notifications-Microservice Endpoints](documentation.md)***
+### 1. ***[Auth & Users Microservice Endpoints](./auth-microservice/README.md)***
+### 2. ***[Products Microservice Endpoints](./product-microservice/README.md)***
+### 3. ***[Notifications-Microservice Endpoints](./notifications-microservice/README.md)***
+### 4. ***[Ads Microservice Endpoints](documentation.md)***
+### 5. ***[Chat Microservice Endpoints](documentation.md)***

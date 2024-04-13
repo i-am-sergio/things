@@ -2,6 +2,7 @@ package main
 
 import (
 	"notifications-microservice/src/config"
+	"notifications-microservice/src/controllers"
 	"notifications-microservice/src/db"
 	"notifications-microservice/src/repositories"
 	"notifications-microservice/src/router"
@@ -12,15 +13,18 @@ import (
 )
 
 func main() {
+
 	loadSecretsFunc := config.LoadSecrets
 	connectDBFunc := db.ConnectDB
 	e, port, errSecrets, errDB := initializeApp(loadSecretsFunc, connectDBFunc)
+
 	if errSecrets != nil {
 		panic(errSecrets)
 	}
 	if errDB != nil {
 		panic(errDB)
 	}
+
 	e.Logger.Fatal(e.Start(":" + port))
 }
 
@@ -33,17 +37,23 @@ func initializeApp(
 	if errSecrets != nil {
 		return nil, "", errSecrets, nil
 	}
+
 	client, errDB := connectDB(mongoURI)
 	if errDB != nil {
 		return nil, "", nil, errDB
 	}
+
 	db := client.Database("notificationmcsv")
 
 	notificationRepo := repositories.NewNotificationRepository(db)
 	notificationService := services.NewNotificationService(notificationRepo)
+	notificationController := controllers.NewNotificationController(notificationService)
 
 	e := echo.New()
-	router.NotificationRoutes(e, notificationService)
+
+	router := router.NewRouter(notificationController)
+
+	router.NotificationRoutes(e)
 
 	return e, port, nil, nil
 }
