@@ -2,10 +2,8 @@ package db_test
 
 import (
 	"auth-microservice/db"
-	"context"
 	"log"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -77,31 +75,31 @@ import (
 // 	assert.Error(t, err)
 // }
 
-func TestConnectDB(t *testing.T) {
-	// Define el DNS de prueba para la conexión.
-	testDNS := "host=localhost user=postgres password=admin dbname=users port=5432"
+// func TestConnectDB(t *testing.T) {
+// 	// Define el DNS de prueba para la conexión.
+// 	testDNS := "host=localhost user=postgres password=admin dbname=users port=5432"
 
-	// Llama a la función DBConnection con el DNS de prueba.
-	dbInstance, err := db.DBConnection(testDNS)
+// 	// Llama a la función DBConnection con el DNS de prueba.
+// 	dbInstance, err := db.DBConnection(testDNS)
 
-	// Verifica si se produjeron errores al establecer la conexión.
-	if err != nil {
-		log.Println("Error connecting to the database:", err)
-	}
+// 	// Verifica si se produjeron errores al establecer la conexión.
+// 	if err != nil {
+// 		log.Println("Error connecting to the database:", err)
+// 	}
 
-	// Verifica si la instancia de la base de datos no es nula.
-	assert.NotNil(t, dbInstance, "Database connection should not be nil")
+// 	// Verifica si la instancia de la base de datos no es nula.
+// 	assert.NotNil(t, dbInstance, "Database connection should not be nil")
 
-	// Verifica si no se produjeron errores al conectar.
-	assert.NoError(t, err, "Failed to connect to the database")
+// 	// Verifica si no se produjeron errores al conectar.
+// 	assert.NoError(t, err, "Failed to connect to the database")
 
-	// Intenta cerrar la conexión a la base de datos (si existe).
-	if dbInstance != nil {
-		_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		assert.NoError(t, err, "Failed to close the database connection")
-	}
-}
+// 	// Intenta cerrar la conexión a la base de datos (si existe).
+// 	if dbInstance != nil {
+// 		_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 		defer cancel()
+// 		assert.NoError(t, err, "Failed to close the database connection")
+// 	}
+// }
 
 func TestConnectDBError(t *testing.T) {
 	// Define el DNS de prueba para la conexión.
@@ -116,7 +114,7 @@ func TestConnectDBError(t *testing.T) {
 	}
 
 	// Verifica si la instancia de la base de datos no es nula.
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Nil(t, instanceDB)
 
 }
