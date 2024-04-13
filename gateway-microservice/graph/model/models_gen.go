@@ -6,22 +6,15 @@ type Mutation struct {
 }
 
 type Notification struct {
-	ID      string `json:"_id"`
-	UserID  string `json:"userId"`
-	Message string `json:"message"`
-	IsRead  bool   `json:"isRead"`
-}
-
-type NotificationInput struct {
-	UserID  string `json:"userId"`
-	Title   string `json:"title"`
-	Message string `json:"message"`
-	IsRead  bool   `json:"isRead"`
-}
-
-type NotificationResponse struct {
-	Message string `json:"message"`
-	IsRead  bool   `json:"isRead"`
+	ID        string  `json:"id"`
+	UserID    *string `json:"userId,omitempty"`
+	Title     *string `json:"title,omitempty"`
+	Message   *string `json:"message,omitempty"`
+	Image     *string `json:"image,omitempty"`
+	IsRead    *bool   `json:"isRead,omitempty"`
+	Type      *string `json:"type,omitempty"`
+	CreatedAt *string `json:"createdAt,omitempty"`
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 }
 
 type Query struct {

@@ -6,14 +6,13 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"gateway-microservice/graph/model"
 )
 
 // CreateNotification is the resolver for the createNotification field.
 func (r *mutationResolver) CreateNotification(ctx context.Context, userID string, title string, message string, isRead bool) (*model.Notification, error) {
-	panic(fmt.Errorf("not implemented: CreateNotification - createNotification"))
-	// return r.Resolver.CreateNotification(ctx, userID, title, message, isRead)
+	// panic(fmt.Errorf("not implemented: CreateNotification - createNotification"))
+	return r.Resolver.CreateNotification(ctx, userID, title, message, isRead)
 }
 
 // GetNotificationByID is the resolver for the getNotificationById field.
