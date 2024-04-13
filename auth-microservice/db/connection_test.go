@@ -2,119 +2,87 @@ package db_test
 
 import (
 	"auth-microservice/db"
-	"log"
+	"database/sql"
+	"errors"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-// import (
-// 	"auth-microservice/db"
-// 	"errors"
-// 	"os"
-// 	"testing"
-
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/mock"
-// 	"gorm.io/gorm"
-// )
-
-// // MockDB es un mock de *gorm.DB.
-// type MockDB struct {
-// 	mock.Mock
-// }
-
-// func (m *MockDB) DBConnection() (*gorm.DB, error) {
-// 	args := m.Called()
-// 	return args.Get(0).(*gorm.DB), args.Error(1)
-// }
-
-// func TestDBConnection(t *testing.T) {
-// 	// Configurar el mock de *gorm.DB
-// 	mockDB := new(MockDB)
-
-// 	// Crear una instancia de DatabaseImpl usando el mock
-// 	conn := db.NewConnection(mockDB)
-
-// 	os.Setenv("DB_DNS", "host=localhost user=postgres password=admin dbname=users port=5432")
-// 	gormDB := &gorm.DB{}
-// 	mockDB.On("DBConnection").Return(gormDB, nil)
-// 	_, err := conn.DBConnection()
-
-// 	assert.Nil(t, err)
-// 	// mockDB.AssertExpectations(t) // Asegura que todas las expectativas se cumplan
-// }
-
-// func TestDBConnectionError(t *testing.T) {
-// 	// Configurar el mock de *gorm.DB
-// 	mockDB := new(MockDB)
-
-// 	// Crear una instancia de DatabaseImpl usando el mock
-// 	conn := db.NewConnection(mockDB)
-
-// 	os.Setenv("DB_DNS", "host=localhost user=postgres password=admin dbname=users port=54s32")
-// 	gormDB := &gorm.DB{}
-// 	mockDB.On("DBConnection").Return(gormDB, errors.New("failed to connect to database"))
-// 	_, err := conn.DBConnection()
-
-// 	assert.Error(t, err)
-// 	// mockDB.AssertExpectations(t) // Asegura que todas las expectativas se cumplan
-// }
-
-// func TestNewConnectionWithNilDB(t *testing.T) {
-// 	// Llama a NewConnection con db == nil
-// 	conn := db.NewConnection(nil)
-
-// 	// Asegúrate de que la instancia de conexión sea diferente de nil
-// 	assert.NotNil(t, conn)
-
-// 	// Intenta llamar a DBConnection en la instancia de conexión
-// 	_, err := conn.DBConnection()
-
-// 	// Verifica si se produce un error, ya que no se proporcionó ninguna base de datos
-// 	assert.Error(t, err)
-// }
-
-// func TestConnectDB(t *testing.T) {
-// 	// Define el DNS de prueba para la conexión.
-// 	testDNS := "host=localhost user=postgres password=admin dbname=users port=5432"
-
-// 	// Llama a la función DBConnection con el DNS de prueba.
-// 	dbInstance, err := db.DBConnection(testDNS)
-
-// 	// Verifica si se produjeron errores al establecer la conexión.
-// 	if err != nil {
-// 		log.Println("Error connecting to the database:", err)
-// 	}
-
-// 	// Verifica si la instancia de la base de datos no es nula.
-// 	assert.NotNil(t, dbInstance, "Database connection should not be nil")
-
-// 	// Verifica si no se produjeron errores al conectar.
-// 	assert.NoError(t, err, "Failed to connect to the database")
-
-// 	// Intenta cerrar la conexión a la base de datos (si existe).
-// 	if dbInstance != nil {
-// 		_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 		defer cancel()
-// 		assert.NoError(t, err, "Failed to close the database connection")
-// 	}
-// }
-
-func TestConnectDBError(t *testing.T) {
-	// Define el DNS de prueba para la conexión.
-	testDNS := "host=localhostt user=postgres password=admin dbname=users port=5432"
-
-	// Llama a la función DBConnection con el DNS de prueba.
-	instanceDB, err := db.DBConnection(testDNS)
-
-	// Verifica si se produjeron errores al establecer la conexión.
+func DbMock(t *testing.T) (*sql.DB, *gorm.DB, sqlmock.Sqlmock) {
+	sqldb, mock, err := sqlmock.New()
 	if err != nil {
-		log.Println("Error connecting to the database:", err)
+		t.Fatal(err)
 	}
+	gormdb, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: sqldb,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 
-	// Verifica si la instancia de la base de datos no es nula.
+	if err != nil {
+		t.Fatal(err)
+	}
+	return sqldb, gormdb, mock
+}
+
+type MockDBConnector struct {
+	mock.Mock
+}
+
+func (m *MockDBConnector) DBConnection(dns string) (*gorm.DB, error) {
+	args := m.Called(dns)
+	return args.Get(0).(*gorm.DB), args.Error(1)
+
+}
+
+func TestDBConnection_Success(t *testing.T) {
+	// Preparar el mock de la base de datos y el mock de GORM
+	sqlDB, gormDB, mockmock := DbMock(t)
+	defer sqlDB.Close() // Asegúrate de cerrar la conexión a la base de datos simulada
+
+	// Configurar las expectativas del mock
+	mockmock.ExpectPing()
+
+	// Crear un mock de DBConnector
+	mockConnector := new(MockDBConnector)
+	mockConnector.On("DBConnection", mock.Anything).Return(gormDB, nil)
+
+	// Intentar conectar a la base de datos utilizando el mock de DBConnector
+	dns := "mock_dsn" // Esto podría ser cualquier cadena ya que estamos usando un mock
+	actualDB, err := db.DBConnection(mockConnector, dns)
+
+	// Verificar que no hay errores y que la conexión se haya establecido correctamente
+	assert.NoError(t, err)
+	assert.NotNil(t, actualDB)
+
+	// Verificar que todas las expectativas del mock se cumplieron
+}
+
+func TestDBConnection_Error(t *testing.T) {
+	// Preparar el mock de la base de datos y el mock de GORM
+	sqlDB, _, mockmock := DbMock(t)
+	defer sqlDB.Close() // Asegúrate de cerrar la conexión a la base de datos simulada
+
+	// Configurar las expectativas del mock
+	mockmock.ExpectPing()
+
+	// Crear un mock de DBConnector
+	mockConnector := new(MockDBConnector)
+	mockConnector.On("DBConnection", mock.Anything).Return(&gorm.DB{}, errors.New("Error connecting to db"))
+
+	// Intentar conectar a la base de datos utilizando el mock de DBConnector
+	dns := "mock_dsn" // Esto podría ser cualquier cadena ya que estamos usando un mock
+	actualDB, err := db.DBConnection(mockConnector, dns)
+
+	// Verificar que no hay errores y que la conexión se haya establecido correctamente
 	assert.Error(t, err)
-	assert.Nil(t, instanceDB)
+	assert.Nil(t, actualDB)
 
+	// Verificar que todas las expectativas del mock se cumplieron
 }

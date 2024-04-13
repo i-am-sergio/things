@@ -3,7 +3,6 @@ package main
 import (
 	"auth-microservice/controllers"
 	"auth-microservice/db"
-	"auth-microservice/models"
 	"auth-microservice/repository"
 	"auth-microservice/routes"
 	"auth-microservice/services"
@@ -14,36 +13,49 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
+// DBConnectorImplementation es una implementación concreta de la interfaz DBConnector.
+type DBConnectorImplementation struct{}
+
+// DBConnection conecta a la base de datos utilizando el DNS proporcionado.
+func (d *DBConnectorImplementation) DBConnection(dns string) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
+	if err != nil {
+		log.Println("Failed to connect to database:", err)
+		return nil, err
+	}
+
+	log.Println("DB connected")
+	return db, nil
+}
+
 func main() {
-	// Cargar las variables de entorno desde el archivo .env
+	e, port := Run()
+	e.Logger.Fatal(e.Start(":" + port))
+}
+
+func Run() (*echo.Echo, string) {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading the .env file: %v", err)
 	}
-
-	// Inicializar Cloudinary
 	if err := utils.Init(); err != nil {
 		log.Fatalf("Failed to initialize Cloudinary: %v", err)
 	}
 	dns := os.Getenv("DB_DNS")
-	conn, err := db.DBConnection(dns)
+	connector := &DBConnectorImplementation{}
+	conn, err := db.DBConnection(connector, dns)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
-
 	}
-	conn.AutoMigrate(&models.User{})
-
 	repo := repository.NewUserRepository(conn)
-
 	userService := services.NewUserService(repo)
-
 	userController := controllers.NewUserController(userService)
-
 	e := echo.New()
 
 	routes.UsersRoutes(e, userController)
-
-	// Iniciar el servidor
-	e.Logger.Fatal(e.Start(":8001"))
+	port := os.Getenv("PORT")
+	return e, port
 }
