@@ -3,31 +3,31 @@ POST http://localhost:8005/notifications
 Content-Type: application/json
 
 {
-    "userId": "223",
-    "title": "Notification Title 5",
+    "userId": "323",
+    "title": "Notification Title 301",
     "message": "Notification Message",
-    "type": "info",
-    "isRead": false
+    "type": "info"
 }
 
 
 ### Get Notification By Id
-GET  http://localhost:8005/notifications/661771e09829d873e2925f1b
+GET  http://localhost:8005/notifications/661ada26367c0642d1b6bb17
 
 ### Get Notification By Id
-GET http://localhost:8005/notifications/6614ae3d6a0447ad87d2a618
+GET http://localhost:8005/notifications/661ade493bf4172a49cb37c4
 
 
 
 ### Get Notifications By User Id
-GET  http://localhost:8005/notifications/user/123
+GET http://localhost:8005/notifications/user/123
 
 ### Get Notifications By User Id
 GET http://localhost:8005/notifications/user/223
 
 
+
 ### Mark Notification As Read
-PUT http://localhost:8005/notifications/markAsRead/6617f566134a2d3049987efa
+PUT http://localhost:8005/notifications/markAsRead/661ade493bf4172a49cb37c4
 
 ### Mark All Notifications As Read
-PUT http://localhost:8005/notifications/markAllAsRead/123
+PUT http://localhost:8005/notifications/markAllAsRead/223

@@ -11,7 +11,7 @@ import (
 
 type NotificationRepository interface {
 	GetNotificationByID(ctx echo.Context, id string) (*models.NotificationModel, error)
-	GetNotificationsByUserID(ctx echo.Context, id string) ([]models.NotificationModel, error)
+	GetNotificationsByUserID(ctx echo.Context, userId string) ([]models.NotificationModel, error)
 	CreateNotification(ctx echo.Context, notification *models.NotificationModel) error
 	MarkAsRead(ctx echo.Context, id string) error
 	MarkAllAsRead(ctx echo.Context, id string) error
@@ -42,10 +42,10 @@ func (r *NotificationRepositoryImpl) GetNotificationByID(ctx echo.Context, id st
 	return &notification, nil
 }
 
-func (r *NotificationRepositoryImpl) GetNotificationsByUserID(ctx echo.Context, id string) ([]models.NotificationModel, error) {
+func (r *NotificationRepositoryImpl) GetNotificationsByUserID(ctx echo.Context, userId string) ([]models.NotificationModel, error) {
 
 	var notifications []models.NotificationModel
-	filter := bson.M{"userID": id}
+	filter := bson.M{"userId": userId}
 	cursor, err := r.collection.Find(ctx.Request().Context(), filter)
 	if err != nil {
 		return nil, err
@@ -67,6 +67,7 @@ func (r *NotificationRepositoryImpl) GetNotificationsByUserID(ctx echo.Context, 
 func (r *NotificationRepositoryImpl) CreateNotification(ctx echo.Context, notification *models.NotificationModel) error {
 	// Generar un ID único para el post
 	notification.Id = primitive.NewObjectID().Hex()
+	notification.IsRead = false
 	_, err := r.collection.InsertOne(ctx.Request().Context(), notification)
 	if err != nil {
 		return err
@@ -93,7 +94,7 @@ func (r *NotificationRepositoryImpl) MarkAsRead(ctx echo.Context, id string) err
 
 func (r *NotificationRepositoryImpl) MarkAllAsRead(ctx echo.Context, id string) error {
 
-	filter := bson.M{"userID": id}
+	filter := bson.M{"userId": id}
 	update := bson.M{"$set": bson.M{"isRead": true}}
 	_, err := r.collection.UpdateMany(ctx.Request().Context(), filter, update)
 	if err != nil {
