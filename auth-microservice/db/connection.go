@@ -1,31 +1,46 @@
 package db
 
 import (
+	"errors"
 	"log"
-	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+// // DatabaseImpl es una implementación de la interfaz Database que envuelve la lógica de la función DBConnection.
+// type Database interface {
+// 	DBConnection() (*gorm.DB, error)
+// }
+// type DatabaseImpl struct {
+// 	DB Database
+// }
 
-func DBConnection() {
-	// Obtener valores de las variables de entorno
-	hostname := os.Getenv("DB_HOST")
-	username := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
+// func NewConnection(db Database) *DatabaseImpl {
+// 	return &DatabaseImpl{
+// 		DB: db,
+// 	}
+// }
 
-	// Configurar la cadena de conexión DNS
-	dns := "host=" + hostname + " user=" + username + " password=" + password + " dbname=" + dbname + " port=" + port
+// func (d *DatabaseImpl) DBConnection() (*gorm.DB, error) {
+// 	dns := os.Getenv("DB_DNS")
+// 	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
+// 	if err != nil {
+// 		log.Println("Failed to connect to database:", err)
+// 		return nil, errors.New("failed to connect to database")
+// 	}
 
-	// Conectar a la base de datos
-	var err error
-	DB, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
+// 	log.Println("DB connected")
+// 	return db, nil
+// }
+
+func DBConnection(dns string) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Failed to connect to database:", err)
+		return nil, errors.New("failed to connect to database")
 	}
+
 	log.Println("DB connected")
+	return db, nil
 }

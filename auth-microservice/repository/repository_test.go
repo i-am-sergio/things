@@ -2,13 +2,15 @@ package repository
 
 import (
 	"auth-microservice/models"
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -34,25 +36,37 @@ func DbMock(t *testing.T) (*sql.DB, *gorm.DB, sqlmock.Sqlmock) {
 func TestGetAllUsers(t *testing.T) {
 	// Arrange
 	t.Run("Get users success", func(t *testing.T) {
+		// Configura la base de datos de prueba y el repositorio de usuarios
 		sqlDB, db, mock := DbMock(t)
 		defer sqlDB.Close()
-
 		implObj := NewUserRepository(db)
+
+		// Configura las filas de datos simulados
 		rows := sqlmock.NewRows([]string{"id_auth", "name", "password", "image"}).
 			AddRow("1", "user1", "password1", "image1").
 			AddRow("2", "user2", "password2", "image2")
 
+		// Configura la expectativa de la consulta SQL
 		expectedSQL := "SELECT (.+) FROM \"users\""
 		mock.ExpectQuery(expectedSQL).WillReturnRows(rows)
-
 		// Act
-		users, err := implObj.GetAllUsers(context.TODO())
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/users", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		// Llama a la función GetAllUsers del repositorio de usuarios con el contexto de Echo
+		users, err := implObj.GetAllUsers(c)
 
 		// Assert
 		assert.Nil(t, err)
 		assert.Equal(t, 2, len(users))
+
+		// Verifica que se hayan cumplido las expectativas del mock
 		assert.Nil(t, mock.ExpectationsWereMet())
 	})
+
 	t.Run("Get users with error", func(t *testing.T) {
 
 		sqlDB, db, mock := DbMock(t)
@@ -60,9 +74,12 @@ func TestGetAllUsers(t *testing.T) {
 
 		implObj := NewUserRepository(db)
 		mock.ExpectQuery("SELECT (.+) FROM \"users\"").WillReturnError(errors.New("database error")) // Simulando un error en la base de datos
-
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/users", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 		// Act
-		users, err := implObj.GetAllUsers(context.TODO())
+		users, err := implObj.GetAllUsers(c)
 
 		// Assert
 		assert.NotNil(t, err)
@@ -90,7 +107,13 @@ func TestCreateUser(t *testing.T) {
 		mock.ExpectCommit()
 
 		// Act
-		createdUser, err := implObj.CreateUser(context.TODO(), user)
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/users", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		createdUser, err := implObj.CreateUser(c, user)
 
 		// Assert
 		assert.Nil(t, err)
@@ -98,6 +121,7 @@ func TestCreateUser(t *testing.T) {
 		assert.Equal(t, user, createdUser)
 		assert.Equal(t, user.Name, createdUser.Name)
 	})
+
 	t.Run("Create user error", func(t *testing.T) {
 		sqlDB, db, mock := DbMock(t)
 		defer sqlDB.Close()
@@ -116,7 +140,13 @@ func TestCreateUser(t *testing.T) {
 		mock.ExpectRollback() // Se espera un rollback debido al error
 
 		// Act
-		createdUser, err := implObj.CreateUser(context.TODO(), user)
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/users", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		createdUser, err := implObj.CreateUser(c, user)
 
 		// Assert
 		assert.NotNil(t, err) // Se espera un error
@@ -148,14 +178,22 @@ func TestGetUserByIdAuth(t *testing.T) {
 
 		expectedSQL := "SELECT (.+) FROM \"users\" WHERE id_auth = ?"
 		mock.ExpectQuery(expectedSQL).WillReturnRows(rows)
+
 		// Act
-		resultUser, err := implObj.GetUserByIdAuth(context.TODO(), userID)
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/users/"+userID, nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		resultUser, err := implObj.GetUserByIdAuth(c, userID)
 
 		// Assert
 		assert.Nil(t, err)
 		assert.NotNil(t, resultUser)
 		assert.Equal(t, expectedUser, resultUser)
 	})
+
 	t.Run("Get user by ID not found", func(t *testing.T) {
 		sqlDB, db, mock := DbMock(t)
 		defer sqlDB.Close()
@@ -165,12 +203,20 @@ func TestGetUserByIdAuth(t *testing.T) {
 
 		expectedSQL := "SELECT (.+) FROM \"users\" WHERE id_auth =?"
 		mock.ExpectQuery(expectedSQL).WillReturnRows(users)
-		_, res := implObj.GetUserByIdAuth(context.TODO(), "2")
+
+		// Act
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/users/2", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		_, res := implObj.GetUserByIdAuth(c, "2")
 		assert.True(t, errors.Is(res, gorm.ErrRecordNotFound))
 		assert.Nil(t, mock.ExpectationsWereMet())
 	})
 }
-func TestUpdateUsesr_Success(t *testing.T) {
+func TestUpdateUser_Success(t *testing.T) {
 	// Arrange
 	t.Run("Update user", func(t *testing.T) {
 		sqlDB, db, mock := DbMock(t)
@@ -186,11 +232,20 @@ func TestUpdateUsesr_Success(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(updUserSQL).WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
-		_, err := implObj.UpdateUser(context.TODO(), "1", updatedUser)
-		assert.Nil(t, err)
 
+		// Act
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/users/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		_, err := implObj.UpdateUser(c, "1", updatedUser)
+
+		// Assert
+		assert.Nil(t, err)
 		assert.Nil(t, mock.ExpectationsWereMet())
 	})
+
 	t.Run("Update user error", func(t *testing.T) {
 		sqlDB, db, mock := DbMock(t)
 		defer sqlDB.Close()
@@ -218,7 +273,12 @@ func TestUpdateUsesr_Success(t *testing.T) {
 		mock.ExpectRollback()
 
 		// Actuar
-		_, err := implObj.UpdateUser(context.TODO(), "1", updatedUser)
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/users/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		_, err := implObj.UpdateUser(c, "1", updatedUser)
 
 		// Afirmar
 		assert.Error(t, err)
@@ -227,7 +287,6 @@ func TestUpdateUsesr_Success(t *testing.T) {
 		assert.Nil(t, mock.ExpectationsWereMet())
 	})
 }
-
 func TestChangeUserRole_Success(t *testing.T) {
 	// Arrange
 	t.Run("Change role", func(t *testing.T) {
@@ -247,7 +306,12 @@ func TestChangeUserRole_Success(t *testing.T) {
 		mock.ExpectCommit()
 
 		// Actuar
-		user, err := implObj.ChangeUserRole(context.TODO(), id, newRole)
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/users/role/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		user, err := implObj.ChangeUserRole(c, id, newRole)
 
 		// Afirmar
 		assert.NoError(t, err)
@@ -257,6 +321,7 @@ func TestChangeUserRole_Success(t *testing.T) {
 		// Asegurar que se cumplieron todas las expectativas
 		assert.Nil(t, mock.ExpectationsWereMet())
 	})
+
 	t.Run("Change role error", func(t *testing.T) {
 		sqlDB, db, mock := DbMock(t)
 		defer sqlDB.Close()
@@ -274,7 +339,12 @@ func TestChangeUserRole_Success(t *testing.T) {
 		mock.ExpectRollback()
 
 		// Actuar
-		user, err := implObj.ChangeUserRole(context.TODO(), id, newRole)
+		// Crea un contexto de Echo vacío
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/users/role/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		user, err := implObj.ChangeUserRole(c, id, newRole)
 
 		// Afirmar
 		assert.Error(t, err)

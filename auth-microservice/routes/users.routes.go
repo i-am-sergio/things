@@ -9,9 +9,9 @@ import (
 
 func UsersRoutes(e *echo.Echo, uc *controllers.UserController) {
 	users := e.Group("/users")
-	users.GET("/", uc.GetAllUsersHandler)
-	users.POST("/", uc.CreateUserHandler)
-	users.GET("/:id", uc.GetUserHandler, middleware.JWTMiddleware)
+	users.GET("/", uc.GetAllUsersHandler, middleware.JWTMiddleware)
+	users.POST("/", uc.CreateUserHandler, middleware.JWTMiddleware)
+	users.GET("/:id", uc.GetUserHandler)
 	users.PUT("/:id", uc.UpdateUserHandler, middleware.JWTMiddleware)
 	users.PUT("/role/:id", uc.ChangeRoleHandler, middleware.JWTMiddleware)
 }

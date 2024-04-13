@@ -7,7 +7,9 @@ import (
 	"auth-microservice/repository"
 	"auth-microservice/routes"
 	"auth-microservice/services"
+	"auth-microservice/utils"
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -21,21 +23,22 @@ func main() {
 	}
 
 	// Inicializar Cloudinary
-	if err := services.Init(); err != nil {
+	if err := utils.Init(); err != nil {
 		log.Fatalf("Failed to initialize Cloudinary: %v", err)
 	}
+	dns := os.Getenv("DB_DNS")
+	conn, err := db.DBConnection(dns)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
 
-	// Establecer la conexión con la base de datos
-	db.DBConnection()
+	}
+	conn.AutoMigrate(&models.User{})
 
-	// Automigrar las tablas
-	db.DB.AutoMigrate(&models.User{})
-
-	repo := repository.NewUserRepository(db.DB)
+	repo := repository.NewUserRepository(conn)
 
 	userService := services.NewUserService(repo)
 
-	userController := controllers.NewUserController(*userService)
+	userController := controllers.NewUserController(userService)
 
 	e := echo.New()
 
