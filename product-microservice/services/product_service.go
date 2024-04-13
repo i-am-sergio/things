@@ -73,7 +73,7 @@ func (c *ProductServiceImpl) CreateProductService(form *multipart.Form, image *m
 
 func (c *ProductServiceImpl) UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error){
 	var product models.Product
-    if err := db.Client.First(&product, productID); err != nil {
+    if err := c.dbClient.First(&product, productID); err != nil {
         return product, err
     }
 	if err := validateRequiredFields(form); err != nil {
