@@ -1,28 +1,26 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+type Notification {
+  _id: ID!
+  userId: String!
+  message: String!
+  isRead: Boolean!
 }
 
-type User {
-  id: ID!
-  name: String!
+type NotificationInput {
+  userId: String!
+  title: String!
+  message: String!
+  isRead: Boolean!
+}
+
+type NotificationResponse {
+  message: String!
+  isRead: Boolean!
 }
 
 type Query {
-  todos: [Todo!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
+  getNotificationById(id: ID!): Notification!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createNotification(userId: String!, title: String!, message: String!, isRead: Boolean!): Notification!
 }

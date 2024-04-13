@@ -10,14 +10,15 @@ import (
 	"gateway-microservice/graph/model"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// CreateNotification is the resolver for the createNotification field.
+func (r *mutationResolver) CreateNotification(ctx context.Context, userID string, title string, message string, isRead bool) (*model.Notification, error) {
+	panic(fmt.Errorf("not implemented: CreateNotification - createNotification"))
+	// return r.Resolver.CreateNotification(ctx, userID, title, message, isRead)
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// GetNotificationByID is the resolver for the getNotificationById field.
+func (r *queryResolver) GetNotificationByID(ctx context.Context, id string) (*model.Notification, error) {
+	return r.Resolver.GetNotificationById(ctx, id)
 }
 
 // Mutation returns MutationResolver implementation.
