@@ -22,3 +22,26 @@
 ### 4. **_[Ads Microservice Endpoints](documentation.md)_**
 
 ### 5. **_[Chat Microservice Endpoints](documentation.md)_**
+
+## **_Docker Compose_**
+
+- **Build**
+    ```bash
+    docker compose create    
+    ```
+- **Build and Initialize**
+    ```bash
+    docker compose up -d   
+    ```
+- **Only Initialize**
+    ```bash
+    docker compose start    
+    ```
+- **Stopping**
+    ```bash
+    docker compose stop  
+    ```
+- **Stop and Delete Multi-container**
+    ```bash
+    docker compose down
+    ```

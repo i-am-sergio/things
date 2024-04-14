@@ -1,21 +1,52 @@
 services:
+
+  # Databases
+  postgresdb:
+    image: bitnami/postgresql:16
+    restart: always
+    environment:
+      POSTGRESQL_PASSWORD: admin
+    ports:
+      - "5432:5432"
+
+  mongodb:
+    image: bitnami/mongodb:7.0
+    restart: always
+    ports:
+      - "27017:27017"
+
+  mysqldb:
+    image: bitnami/mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "3306:3306"
+
+  # Microservices
   authmcsv:
     build:
       context: ./auth-microservice
     ports:
       - "8001:8001"
+    depends_on:
+      - postgresdb
 
   productsmcsv:
     build:
       context: ./product-microservice
     ports:
       - "8002:8002"
+    depends_on:
+      - mysqldb
 
   notificationsmcsv:
     build:
       context: ./notifications-microservice
     ports:
       - "8005:8005"
+    depends_on:
+      - mongodb
 
   gatewaymcsv:
     build:
@@ -23,5 +54,10 @@ services:
     ports:
       - "8888:8888"
     depends_on:
+      - postgresdb
+      - mysqldb
+      - mongodb
       - authmcsv
       - notificationsmcsv
+      - productsmcsv
+
