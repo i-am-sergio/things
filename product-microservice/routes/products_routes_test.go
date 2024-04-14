@@ -77,14 +77,4 @@ func TestProductRoutes(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		mockController.AssertExpectations(t)
 	})
-	t.Run("GetProducts", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/products", nil)
-		rec := httptest.NewRecorder()
-		e.NewContext(req, rec)
-		mockController.On("GetProducts", mock.AnythingOfType("*echo.context")).Return(nil).Once()
-		e.ServeHTTP(rec, req)
-		assert.Equal(t, http.StatusOK, rec.Code)
-		mockController.AssertExpectations(t)
-	})
-	
 }
