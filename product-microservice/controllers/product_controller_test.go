@@ -231,3 +231,318 @@ func TestUpdateProduct(t *testing.T) {
 		mockProductService.AssertExpectations(t)
 	})
 }
+
+func TestGetProducts(t *testing.T) {
+    t.Run("Success", func(t *testing.T) {
+        e := echo.New()
+        req := httptest.NewRequest(http.MethodGet, "/products", nil)
+        rec := httptest.NewRecorder()
+        c := e.NewContext(req, rec)
+        expectedProducts := []models.Product{
+            {ID: 1, Name: "Product 1"},
+            {ID: 2, Name: "Product 2"},
+        }
+        mockProductService := new(MockProductService)
+        mockProductService.On("GetProductsService").Return(expectedProducts, nil)
+        controller := NewProductController(mockProductService)
+        require.NoError(t, controller.GetProducts(c))
+        assert.Equal(t, http.StatusOK, rec.Code)
+        var products []models.Product
+        require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &products))
+        assert.Equal(t, expectedProducts, products)
+        mockProductService.AssertExpectations(t)
+    })
+	t.Run("ServiceError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		expectedError := errors.New("failed to fetch products")
+		mockProductService := new(MockProductService)
+		var nilProducts []models.Product
+		mockProductService.On("GetProductsService").Return(nilProducts, expectedError)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.GetProducts(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		var responseBody map[string]string
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &responseBody))
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, "failed to fetch products", responseBody["error"])
+		mockProductService.AssertExpectations(t)
+	})
+}
+
+func TestGetProductsById(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		expectedProduct := models.Product{ID: 1, Name: "Product 1"}
+		mockProductService := new(MockProductService)
+		mockProductService.On("GetProductByIDService", uint(1)).Return(expectedProduct, nil)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.GetProductsById(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+	t.Run("IDConversionError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products/invalid-id", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("invalid-id")
+		controller := NewProductController(nil)
+		err := controller.GetProductsById(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		var responseBody map[string]string
+		json.Unmarshal(rec.Body.Bytes(), &responseBody)
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, invalidCommentIDError, responseBody["error"])
+	})
+	t.Run("ServiceError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		expectedError := errors.New("failed to fetch product")
+		mockProductService := new(MockProductService)
+		mockProductService.On("GetProductByIDService", uint(1)).Return(models.Product{}, expectedError)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.GetProductsById(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		var responseBody map[string]string
+		json.Unmarshal(rec.Body.Bytes(), &responseBody)
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, "failed to fetch product", responseBody["error"])
+		mockProductService.AssertExpectations(t)
+	})
+}
+
+func TestGetProductsByCategory(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+        e := echo.New()
+        req := httptest.NewRequest(http.MethodGet, "/products?category=test", nil)
+        rec := httptest.NewRecorder()
+        c := e.NewContext(req, rec)
+        expectedProducts := []models.Product{
+            {ID: 1, Name: "Product 1", Category: "test"},
+            {ID: 2, Name: "Product 2", Category: "test"},
+        }
+        mockProductService := new(MockProductService)
+        mockProductService.On("GetProductsByCategoryService", "test").Return(expectedProducts, nil)
+        controller := NewProductController(mockProductService)
+        require.NoError(t, controller.GetProductsByCategory(c))
+        assert.Equal(t, http.StatusOK, rec.Code)
+        var products []models.Product
+        require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &products))
+        assert.Equal(t, expectedProducts, products)
+        mockProductService.AssertExpectations(t)
+    })
+	t.Run("ServiceError", func(t *testing.T) {
+        e := echo.New()
+        req := httptest.NewRequest(http.MethodGet, "/products?category=test", nil)
+        rec := httptest.NewRecorder()
+        c := e.NewContext(req, rec)
+        expectedError := errors.New("failed to fetch products by category")
+        mockProductService := new(MockProductService)
+		var nilProducts []models.Product
+        mockProductService.On("GetProductsByCategoryService", "test").Return(nilProducts, expectedError)
+        controller := NewProductController(mockProductService)
+        require.NoError(t, controller.GetProductsByCategory(c))
+        assert.Equal(t, http.StatusInternalServerError, rec.Code)
+        var responseBody map[string]string
+        require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &responseBody))
+        assert.Contains(t, responseBody, "error")
+        assert.Equal(t, expectedError.Error(), responseBody["error"])
+        mockProductService.AssertExpectations(t)
+    })
+}
+
+func TestSearchProducts(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products?q=test", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		expectedProducts := []models.Product{
+			{ID: 1, Name: "Product 1", Description: "test description"},
+			{ID: 2, Name: "Product 2", Description: "test description"},
+		}
+		mockProductService := new(MockProductService)
+		mockProductService.On("SearchProductsService", "test").Return(expectedProducts, nil)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.SearchProducts(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var products []models.Product
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &products))
+		assert.Equal(t, expectedProducts, products)
+		mockProductService.AssertExpectations(t)
+	})
+	t.Run("ServiceError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products?q=test", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		expectedError := errors.New("failed to search products")
+		mockProductService := new(MockProductService)
+		var nilProducts []models.Product
+		mockProductService.On("SearchProductsService", "test").Return(nilProducts, expectedError)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.SearchProducts(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		var responseBody map[string]string
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &responseBody))
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, expectedError.Error(), responseBody["error"])
+		mockProductService.AssertExpectations(t)
+	})
+}
+
+func TestDeleteProduct(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodDelete, "/products/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		mockProductService := new(MockProductService)
+		mockProductService.On("DeleteProductService", uint(1)).Return(nil)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.DeleteProduct(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+	t.Run("IDConversionError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodDelete, "/products/invalid-id", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("invalid-id")
+		controller := NewProductController(nil)
+		err := controller.DeleteProduct(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		var responseBody map[string]string
+		json.Unmarshal(rec.Body.Bytes(), &responseBody)
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, invalidCommentIDError, responseBody["error"])
+	})
+	t.Run("ServiceError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodDelete, "/products/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		expectedError := errors.New("failed to delete product")
+		mockProductService := new(MockProductService)
+		mockProductService.On("DeleteProductService", uint(1)).Return(expectedError)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.DeleteProduct(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		var responseBody map[string]string
+		json.Unmarshal(rec.Body.Bytes(), &responseBody)
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, expectedError.Error(), responseBody["error"])
+		mockProductService.AssertExpectations(t)
+	})
+}
+
+func TestPremium(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/products/premium/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		expectedProduct := models.Product{ID: 1, Name: "Product 1"}
+		mockProductService := new(MockProductService)
+		mockProductService.On("PremiumService", uint(1)).Return(expectedProduct, nil)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.Premium(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+	t.Run("IDConversionError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/products/premium/invalid-id", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("invalid-id")
+		controller := NewProductController(nil)
+		err := controller.Premium(c)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		var responseBody map[string]string
+		json.Unmarshal(rec.Body.Bytes(), &responseBody)
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, invalidCommentIDError, responseBody["error"])
+	})
+	t.Run("ServiceError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPut, "/products/premium/1", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("id")
+		c.SetParamValues("1")
+		expectedError := errors.New("failed to premium product")
+		mockProductService := new(MockProductService)
+		mockProductService.On("PremiumService", uint(1)).Return(models.Product{}, expectedError)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.Premium(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		var responseBody map[string]string
+		json.Unmarshal(rec.Body.Bytes(), &responseBody)
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, expectedError.Error(), responseBody["error"])
+		mockProductService.AssertExpectations(t)
+	})
+}
+
+func TestGetProductsPremium(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products/premium", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		expectedProducts := []models.Product{
+			{ID: 1, Name: "Product 1", Status: true},
+			{ID: 2, Name: "Product 2", Status: true},
+		}
+		mockProductService := new(MockProductService)
+		mockProductService.On("GetProductsPremiumService").Return(expectedProducts, nil)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.GetProductsPremium(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var products []models.Product
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &products))
+		assert.Equal(t, expectedProducts, products)
+		mockProductService.AssertExpectations(t)
+	})
+	t.Run("ServiceError", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/products/premium", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		expectedError := errors.New("failed to fetch premium products")
+		mockProductService := new(MockProductService)
+		var nilProducts []models.Product
+		mockProductService.On("GetProductsPremiumService").Return(nilProducts, expectedError)
+		controller := NewProductController(mockProductService)
+		require.NoError(t, controller.GetProductsPremium(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		var responseBody map[string]string
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &responseBody))
+		assert.Contains(t, responseBody, "error")
+		assert.Equal(t, expectedError.Error(), responseBody["error"])
+		mockProductService.AssertExpectations(t)
+	})
+}
