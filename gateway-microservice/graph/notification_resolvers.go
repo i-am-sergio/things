@@ -11,7 +11,7 @@ import (
 
 func (r *Resolver) GetNotificationById(ctx context.Context, id string) (*model.Notification, error) {
 	// Realizar una solicitud HTTP GET a la API localhost:8005/notifications/{id}
-	resp, err := http.Get(fmt.Sprintf("http://localhost:8005/notifications/%s", id))
+	resp, err := http.Get(fmt.Sprintf("http://notificationsmcsv:8005/notifications/%s", id))
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (r *Resolver) CreateNotification(ctx context.Context, userID string, title 
 	}
 
 	// Realizar una solicitud HTTP POST a la API localhost:8005/notifications
-	resp, err := http.Post("http://localhost:8005/notifications", "application/json", bytes.NewBuffer(body))
+	resp, err := http.Post("http://notificationsmcsv:8005/notifications", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}

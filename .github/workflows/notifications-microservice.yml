@@ -1,4 +1,4 @@
-name: Build
+name: Notifications microservice
 on:
   push:
     branches:
