@@ -1,0 +1,33 @@
+### Create Notification
+POST http://localhost:8005/notifications
+Content-Type: application/json
+
+{
+    "userId": "323",
+    "title": "Notification Title 301",
+    "message": "Notification Message",
+    "type": "info"
+}
+
+
+### Get Notification By Id
+GET  http://localhost:8005/notifications/661c10c56ed37ead4c1cda0b
+
+### Get Notification By Id
+GET http://localhost:8005/notifications/661ade493bf4172a49cb37c4
+
+
+
+### Get Notifications By User Id
+GET http://localhost:8005/notifications/user/123
+
+### Get Notifications By User Id
+GET http://localhost:8005/notifications/user/223
+
+
+
+### Mark Notification As Read
+PUT http://localhost:8005/notifications/markAsRead/661ade493bf4172a49cb37c4
+
+### Mark All Notifications As Read
+PUT http://localhost:8005/notifications/markAllAsRead/223
