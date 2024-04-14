@@ -4,14 +4,19 @@ import (
 	"auth-microservice/db"
 	"context"
 	"log"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConnectDB(t *testing.T) {
-	testDNS := "host=monorail.proxy.rlwy.net user=postgres password=eWhJpljFwQgFGkhMTTpOVfFCpdqhWLMY dbname=railway port=24696"
+	if err := godotenv.Load("../.env"); err != nil {
+		t.Fatalf("Error loading the .env file: %v", err)
+	}
+	testDNS := os.Getenv("DB_DNS")
 	dbInstance, err := db.DBConnection(testDNS)
 	if err != nil {
 		log.Println("Error connecting to the database:", err)
@@ -22,13 +27,11 @@ func TestConnectDB(t *testing.T) {
 		_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		assert.NoError(t, err, "Failed to close the database connection")
-
 	}
-
 }
 
 func TestConnectDBError(t *testing.T) {
-	testDNS := "host=localhostt user=postgres password=admin dbname=users port=5432"
+	testDNS := "host=localhostt user=postgres password=admin dbname=users port=54321"
 	instanceDB, err := db.DBConnection(testDNS)
 	if err != nil {
 		log.Println("Error connecting to the database:", err)
