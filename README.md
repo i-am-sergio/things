@@ -3,6 +3,7 @@
 [![auth-microservice CI](https://github.com/i-am-sergio/things/actions/workflows/auth-microservice.yml/badge.svg?branch=server-dev)](https://github.com/i-am-sergio/things/actions/workflows/auth-microservice.yml?query=branch:server-dev)
 [![notifications-microservice CI](https://github.com/i-am-sergio/things/actions/workflows/notifications-microservice.yml/badge.svg?branch=server-dev)](https://github.com/i-am-sergio/things/actions/workflows/notifications-microservice.yml?query=branch:server-dev)
 [![product-microservice CI](https://github.com/i-am-sergio/things/actions/workflows/product-microservice.yml/badge.svg?branch=server-dev)](https://github.com/i-am-sergio/things/actions/workflows/product-microservice.yml?query=branch:server-dev)
+
 ![SonarCloud](https://img.shields.io/badge/Sonar%20cloud-F3702A?style=for-the-badge&logo=sonarcloud&logoColor=white)
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 ![GraphQL](https://img.shields.io/badge/-GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
