@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateAdHandler(t *testing.T) {
+func TestCreateAdd_Succes(t *testing.T) {
 	// Crear una instancia del servicio mock generado
 	mockService := new(mocks.AdService)
 
@@ -55,5 +55,3 @@ func TestCreateAdHandler(t *testing.T) {
 	// Verificar que se llamó al método del mock como se esperaba
 	mockService.AssertExpectations(t)
 }
-
-// Puedes continuar implementando pruebas similares para los demás métodos del controlador
