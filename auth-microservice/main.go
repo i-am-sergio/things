@@ -40,7 +40,7 @@ func Run() (*echo.Echo, string) {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading the .env file: %v", err)
 	}
-	if err := utils.Init(); err != nil {
+	if err := utils.Init(".env"); err != nil {
 		log.Fatalf("Failed to initialize Cloudinary: %v", err)
 	}
 	dns := os.Getenv("DB_DNS")

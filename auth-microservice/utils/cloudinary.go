@@ -17,8 +17,8 @@ import (
 var CloudinaryInstance *cloudinary.Cloudinary
 var CloudinaryContext context.Context
 
-func Init() error {
-	err := godotenv.Load()
+func Init(envPath string) error {
+	err := godotenv.Load(envPath)
 	if err != nil {
 		return fmt.Errorf("error loading .env file: %w", err)
 

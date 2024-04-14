@@ -25,6 +25,8 @@ func NewUserRepository(db *gorm.DB) *UserRepositoryImpl {
 	}
 }
 
+var byId = "id_auth = ?"
+
 func (d *UserRepositoryImpl) GetAllUsers(ctx echo.Context) ([]models.User, error) {
 	var users []models.User
 	if err := d.DB.WithContext(ctx.Request().Context()).Find(&users).Error; err != nil {
@@ -41,7 +43,7 @@ func (d *UserRepositoryImpl) CreateUser(ctx echo.Context, user *models.User) (*m
 }
 
 func (d *UserRepositoryImpl) UpdateUser(ctx echo.Context, id string, updatedUser *models.User) (*models.User, error) {
-	if err := d.DB.WithContext(ctx.Request().Context()).Model(&models.User{}).Where("id_auth = ?", id).Updates(updatedUser).Error; err != nil {
+	if err := d.DB.WithContext(ctx.Request().Context()).Model(&models.User{}).Where(byId, id).Updates(updatedUser).Error; err != nil {
 		return nil, err
 	}
 
@@ -52,13 +54,13 @@ func (d *UserRepositoryImpl) UpdateUser(ctx echo.Context, id string, updatedUser
 func (d *UserRepositoryImpl) GetUserByIdAuth(ctx echo.Context, idAuth string) (*models.User, error) {
 	var user *models.User
 
-	err := d.DB.WithContext(ctx.Request().Context()).Where("id_auth = ?", idAuth).First(&user).Error
+	err := d.DB.WithContext(ctx.Request().Context()).Where(byId, idAuth).First(&user).Error
 
 	return user, err
 }
 func (d *UserRepositoryImpl) ChangeUserRole(ctx echo.Context, id string, newRole models.Role) (*models.User, error) {
 	var user models.User
-	result := d.DB.WithContext(ctx.Request().Context()).Model(&user).Where("id_auth = ?", id).Update("role", newRole)
+	result := d.DB.WithContext(ctx.Request().Context()).Model(&user).Where(byId, id).Update("role", newRole)
 	if result.Error != nil {
 		return nil, result.Error
 	}

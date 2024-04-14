@@ -41,9 +41,6 @@ func TestJWTMiddleware_ValidToken(t *testing.T) {
 
 func TestJWTMiddleware_InvalidToken(t *testing.T) {
 	// Configurar las variables de entorno necesarias para el test
-	os.Setenv("AUTH0_DOMAIN", "dev-s58rmvtjw3nw8yk4.us.auth0.com")
-	os.Setenv("AUTH0_AUDIENCE", "https://api-golang-test")
-
 	// Preparar un servidor de prueba de Echo
 	e := echo.New()
 

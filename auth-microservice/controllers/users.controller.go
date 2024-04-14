@@ -30,15 +30,8 @@ func (uc *UserController) GetAllUsersHandler(c echo.Context) error {
 
 func (uc *UserController) CreateUserHandler(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
-	if authHeader == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Token de autorización faltante")
-	}
 
 	authParts := strings.Split(authHeader, " ")
-	if len(authParts) != 2 || authParts[0] != "Bearer" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Formato de token de autorización inválido")
-	}
-
 	token := authParts[1]
 	sub := utils.GetIdTokenJWTAuth0(token)
 	var user models.User
@@ -53,10 +46,8 @@ func (uc *UserController) CreateUserHandler(c echo.Context) error {
 
 func (uc *UserController) UpdateUserHandler(c echo.Context) error {
 	id := c.Param("id")
-	form, err := c.MultipartForm()
-	if err != nil {
-		return err
-	}
+	form, _ := c.MultipartForm()
+
 	var updateUser models.User
 
 	if name, ok := form.Value["name"]; ok && len(name) > 0 {
@@ -86,20 +77,14 @@ func (uc *UserController) UpdateUserHandler(c echo.Context) error {
 	if statusCode != nil {
 		return c.JSON(http.StatusInternalServerError, nil)
 	}
-	if user == nil {
-		return c.JSON(http.StatusNotFound, nil)
-	}
 	return c.JSON(http.StatusOK, user)
 }
 
 func (uc *UserController) ChangeRoleHandler(c echo.Context) error {
 	id := c.Param("id")
 
-	// Obtener el nuevo rol del cuerpo de la solicitud
 	var newRole models.Role
-	if err := c.Bind(&newRole); err != nil {
-		return err
-	}
+	c.Bind(&newRole)
 	user, err := uc.service.ChangeUserRoleService(c, id, newRole)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, nil)
