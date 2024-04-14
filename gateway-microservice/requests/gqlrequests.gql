@@ -1,0 +1,17 @@
+
+# GQL Query to get a notification by id
+query {
+  getNotificationById(id:"6619f4c3a370e60239ff81fb"){
+    userId
+    message
+    isRead
+  }
+}
+
+# GQL Mutation to create a notification
+mutation {
+  createNotification(userId:"123", title:"New Notification 111", message:"This is a new notification", isRead:false){
+    message
+    isRead
+  }
+}
