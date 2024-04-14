@@ -67,10 +67,7 @@ func (uc *UserController) UpdateUserHandler(c echo.Context) error {
 	}
 
 	if file, err := c.FormFile("image"); err == nil {
-		cloudinaryURL, err := utils.UploadImage(file)
-		if err != nil {
-			return err
-		}
+		cloudinaryURL, _ := utils.UploadImage(file)
 		updateUser.Image = cloudinaryURL
 	}
 	user, statusCode := uc.service.UpdateUserService(c, id, &updateUser)

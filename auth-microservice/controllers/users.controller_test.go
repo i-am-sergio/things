@@ -173,6 +173,13 @@ func TestUpdateUserHandlerError(t *testing.T) {
 
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
+
+	utils.Init("../.env")
+	writer.WriteField("name", "Updated Name")
+	writer.WriteField("password", "new_password")
+	writer.WriteField("email", "new_email@example.com")
+	writer.WriteField("ubication", "New Ubication")
+	writer.CreateFormFile("image", "asdasdasdjpg")
 	writer.Close()
 	mocks.On("UpdateUserService", mock.Anything, mock.Anything, mock.Anything).Return(&models.User{}, errors.New("Mensaje oculto v:"))
 	e := echo.New()
@@ -187,6 +194,7 @@ func TestUpdateUserHandlerError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	mocks.AssertExpectations(t)
 }
+
 func TestChangeRoleHandler(t *testing.T) {
 	// Configurar el controlador con el servicio mock
 	mockService := new(MockUserService)
