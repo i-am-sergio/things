@@ -50,6 +50,12 @@ func Run() (*echo.Echo, string) {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
+	conn.Model(&models.User{}).Create(&models.User{
+		Name: "Pepito", IdAuth: "1", Email: "turroncito_de_azucar@mock.com", Password: "brrr", Image: "https://res.cloudinary.com/dhocrtxvp/image/upload/v1712604420/users/20240408142659_flower.jpg", Ubication: "Contigo", Role: "ADMIN",
+	})
+	conn.Model(&models.User{}).Create(&models.User{
+		Name: "Kiko", IdAuth: "2", Email: "testing@mock.com", Password: "comida", Image: "https://res.cloudinary.com/dhocrtxvp/image/upload/v1712459607/users/20240406221326_Captura%20desde%202023-12-09%2016-07-41.png", Ubication: "Sin ti", Role: "ADMIN",
+	})
 	repo := repository.NewUserRepository(conn)
 	userService := services.NewUserService(repo)
 	userController := controllers.NewUserController(userService)
