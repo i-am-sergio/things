@@ -41,7 +41,6 @@ func (m *MockUserRepository) ChangeUserRole(ctx echo.Context, id string, newRole
 }
 
 func TestGelAllUsers(t *testing.T) {
-	// GIVEN
 	mockRepo := new(MockUserRepository)
 	expectedUser := []models.User{
 		{IdAuth: "1",
@@ -55,26 +54,21 @@ func TestGelAllUsers(t *testing.T) {
 	service := services.NewUserService(mockRepo)
 	mockRepo.On("GetAllUsers", mock.Anything).Return(expectedUser, nil)
 
-	// WHEN
 	result, err := service.GetAllUsersService(nil)
 
-	// THEN
 	assert.Nil(t, err)
 	assert.Equal(t, expectedUser, result)
 	mockRepo.AssertExpectations(t)
 }
 
 func TestGetAllUsers_Error(t *testing.T) {
-	// GIVEN
 	mockRepo := new(MockUserRepository)
 	expectedError := errors.New("error fetching users")
 	service := services.NewUserService(mockRepo)
 	mockRepo.On("GetAllUsers", mock.Anything, mock.Anything).Return([]models.User{}, expectedError)
 
-	// WHEN
 	_, err := service.GetAllUsersService(nil)
 
-	// THEN
 	assert.Error(t, err)
 	mockRepo.AssertExpectations(t)
 }
@@ -94,10 +88,8 @@ func TestGetUserByIdAuth(t *testing.T) {
 	service := services.NewUserService(mockRepo)
 	mockRepo.On("GetUserByIdAuth", mock.Anything, expectedUser.IdAuth).Return(expectedUser, nil)
 
-	// WHEN
 	result, err := service.GetUserByIdAuthService(nil, expectedUser.IdAuth)
 
-	// THEN
 	assert.Nil(t, err)
 	assert.Equal(t, expectedUser, result)
 	mockRepo.AssertExpectations(t)
@@ -119,10 +111,8 @@ func TestGetUserByIdAuthError(t *testing.T) {
 	service := services.NewUserService(mockRepo)
 	mockRepo.On("GetUserByIdAuth", mock.Anything, expectedUser.IdAuth).Return(&models.User{}, errors.New("error fetching user"))
 
-	// WHEN
 	_, err := service.GetUserByIdAuthService(nil, expectedUser.IdAuth)
 
-	// THEN
 	assert.Error(t, err)
 	mockRepo.AssertExpectations(t)
 	mockRepo.AssertExpectations(t)

@@ -16,21 +16,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// // DBConnectorImplementation es una implementación concreta de la interfaz DBConnector.
-// type DBConnectorImplementation struct{}
-
-// // DBConnection conecta a la base de datos utilizando el DNS proporcionado.
-// func (d *DBConnectorImplementation) DBConnection(dns string) (*gorm.DB, error) {
-// 	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
-// 	if err != nil {
-// 		log.Println("Failed to connect to database:", err)
-// 		return nil, err
-// 	}
-
-// 	log.Println("DB connected")
-// 	return db, nil
-// }
-
 func main() {
 	e, port := Run()
 	e.Logger.Fatal(e.Start(":" + port))
@@ -44,7 +29,6 @@ func Run() (*echo.Echo, string) {
 		log.Fatalf("Failed to initialize Cloudinary: %v", err)
 	}
 	dns := os.Getenv("DB_DNS")
-	// connector := &DBConnectorImplementation{}
 	conn, err := db.DBConnection(dns)
 	conn.AutoMigrate(&models.User{})
 	if err != nil {
