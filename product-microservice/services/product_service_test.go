@@ -427,3 +427,226 @@ func TestUpdateProductService(t *testing.T) {
 		assert.Equal(t, uint(2), product.UserID)
 	})
 }
+
+func TestGetProductsService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expectedProducts := []models.Product{
+			{UserID: 1, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"},
+			{UserID: 2, Name: "Product 2", Description: "Description 2", Category: "Category 2", Price: 20.0, Ubication: "Ubication 2"},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("Find", mock.AnythingOfType("*[]models.Product"), []interface{}(nil)).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*[]models.Product)
+			*arg = expectedProducts
+		}).Return(nil)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsService()
+		require.NoError(t, err)
+		assert.Equal(t, expectedProducts, products)
+	})
+	t.Run("Error getting products", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("Find", mock.AnythingOfType("*[]models.Product"), []interface{}(nil)).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsService()
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Nil(t, products)
+	})
+}
+
+func TestGetProducByIDtService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expectedProduct := models.Product{UserID: 1, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Product)
+			*arg = expectedProduct
+		}).Return(nil)
+		service := NewProductService(mockDB, nil)
+		product, err := service.GetProductByIDService(1)
+		require.NoError(t, err)
+		assert.Equal(t, expectedProduct, product)
+	})
+	t.Run("Product not found", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		product, err := service.GetProductByIDService(1)
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Equal(t, uint(0), product.UserID)
+	})
+}
+
+func TestGetProductsByCategoryService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expectedProducts := []models.Product{
+			{UserID: 1, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"},
+			{UserID: 2, Name: "Product 2", Description: "Description 2", Category: "Category 1", Price: 20.0, Ubication: "Ubication 2"},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("FindWithCondition", mock.AnythingOfType("*[]models.Product"), "category = ?", []interface {}{"Category 1"}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*[]models.Product)
+			*arg = expectedProducts
+		}).Return(nil)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsByCategoryService("Category 1")
+		require.NoError(t, err)
+		assert.Equal(t, expectedProducts, products)
+	})
+	t.Run("Error getting products", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("FindWithCondition", mock.AnythingOfType("*[]models.Product"), "category = ?", []interface {}{"Category 1"}).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsByCategoryService("Category 1")
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Nil(t, products)
+	})
+	t.Run("Empty category", func(t *testing.T) {
+		expectedProducts := []models.Product{
+			{UserID: 1, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"},
+			{UserID: 2, Name: "Product 2", Description: "Description 2", Category: "Category 2", Price: 20.0, Ubication: "Ubication 2"},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("Find", mock.AnythingOfType("*[]models.Product"), []interface{}(nil)).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*[]models.Product)
+			*arg = expectedProducts
+		}).Return(nil)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsByCategoryService("")
+		require.NoError(t, err)
+		assert.Equal(t, expectedProducts, products)
+	})
+	t.Run("Error getting products with empty category", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("Find", mock.AnythingOfType("*[]models.Product"), []interface{}(nil)).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsByCategoryService("")
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Nil(t, products)
+	})
+}
+
+func TestSearchProductsService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expectedProducts := []models.Product{
+			{UserID: 1, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"},
+			{UserID: 2, Name: "Product 2", Description: "Description 2", Category: "Category 1", Price: 20.0, Ubication: "Ubication 2"},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("FindWithCondition", mock.AnythingOfType("*[]models.Product"), "name LIKE ? OR description LIKE ?", []interface {}{"%Product%", "%Product%"}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*[]models.Product)
+			*arg = expectedProducts
+		}).Return(nil)
+		service := NewProductService(mockDB, nil)
+		products, err := service.SearchProductsService("Product")
+		require.NoError(t, err)
+		assert.Equal(t, expectedProducts, products)
+	})
+	t.Run("Error getting products", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("FindWithCondition", mock.AnythingOfType("*[]models.Product"), "name LIKE ? OR description LIKE ?", []interface {}{"%Product%", "%Product%"}).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		products, err := service.SearchProductsService("Product")
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Nil(t, products)
+	})
+}
+
+func TestDeleteProductService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("DeleteWithCondition", mock.AnythingOfType("*models.Comment"), "product_id = ?", []interface{}{uint(1)}).Return(nil)
+		mockDB.On("DeleteByID", mock.AnythingOfType("*models.Product"), uint(1)).Return(nil)
+		service := NewProductService(mockDB, nil)
+		err := service.DeleteProductService(1)
+		require.NoError(t, err)
+	})
+	t.Run("Error deleting product", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("DeleteWithCondition", mock.AnythingOfType("*models.Comment"), "product_id = ?", []interface{}{uint(1)}).Return(nil)
+		mockDB.On("DeleteByID", mock.AnythingOfType("*models.Product"), uint(1)).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		err := service.DeleteProductService(1)
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+	})
+	t.Run("Error deleting comments", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("DeleteWithCondition", mock.AnythingOfType("*models.Comment"), "product_id = ?", []interface{}{uint(1)}).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		err := service.DeleteProductService(1)
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+	})
+}
+
+func TestPremiumService(t *testing.T) {
+	t.Run("Sucess", func(t *testing.T) {
+		expectedProduct := models.Product{UserID: 1, Status: false, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Product)
+			*arg = expectedProduct
+		}).Return(nil)
+		mockDB.On("Save", mock.AnythingOfType("*models.Product")).Return(nil)
+		service := NewProductService(mockDB, nil)
+		product, err := service.PremiumService(1)
+		require.NoError(t, err)
+		assert.Equal(t, true, product.Status)
+	})
+	t.Run("Product not found", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		product, err := service.PremiumService(1)
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Equal(t, uint(0), product.UserID)
+	})
+	t.Run("Error updating product", func(t *testing.T) {
+		expectedProduct := models.Product{UserID: 1, Status: false, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Product)
+			*arg = expectedProduct
+		}).Return(nil)
+		mockDB.On("Save", mock.AnythingOfType("*models.Product")).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		product, err := service.PremiumService(1)
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Equal(t, uint(1), product.UserID)
+	})
+}
+
+func TestGetProductsPremiumService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expectedProducts := []models.Product{
+			{UserID: 1, Status: true, Name: "Product 1", Description: "Description 1", Category: "Category 1", Price: 10.0, Ubication: "Ubication 1"},
+			{UserID: 2, Status: true, Name: "Product 2", Description: "Description 2", Category: "Category 1", Price: 20.0, Ubication: "Ubication 2"},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("FindWithCondition", mock.AnythingOfType("*[]models.Product"), "status = ?", []interface {}{true}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*[]models.Product)
+			*arg = expectedProducts
+		}).Return(nil)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsPremiumService()
+		require.NoError(t, err)
+		assert.Equal(t, expectedProducts, products)
+	})
+	t.Run("Error getting products", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("FindWithCondition", mock.AnythingOfType("*[]models.Product"), "status = ?", []interface {}{true}).Return(assert.AnError)
+		service := NewProductService(mockDB, nil)
+		products, err := service.GetProductsPremiumService()
+		require.Error(t, err)
+		assert.Equal(t, assert.AnError, err)
+		assert.Nil(t, products)
+	})
+}
