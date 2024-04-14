@@ -1,5 +1,5 @@
 # Build the binary
-FROM golang:1.22.1-alpine AS builder
+FROM golang:1.22.2-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
