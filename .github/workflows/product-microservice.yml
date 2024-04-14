@@ -1,0 +1,31 @@
+name: Build
+on:
+  push:
+    branches:
+      - server-shinji
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Change directory
+        run: cd product-microservice
+      - name: Install dependencies
+        run: go mod download
+        working-directory: product-microservice
+      - name: Test and coverage
+        run: go test ./... -coverprofile=coverage.out
+        working-directory: product-microservice
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_SHINJI }}
+        with:
+          args: >
+            -Dsonar.projectBaseDir=./product-microservice
