@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"product-microservice/controllers"
 	"product-microservice/db"
 	"product-microservice/models"
@@ -27,9 +26,6 @@ func main() {
         log.Fatalf("Failed to initialize Cloudinary: %v", err)
     }
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, Proucts!")
-	})
 	productService := services.NewProductService(db.Client, cloudinary)
 	commentService := services.NewCommentService(db.Client)
 	productController := controllers.NewProductController(productService)
