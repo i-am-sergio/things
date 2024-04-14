@@ -148,6 +148,29 @@ func TestCreateCommentsService(t *testing.T) {
 		require.Error(t, err)
 		mockDB.AssertExpectations(t)
 	})
+	t.Run("Error FindPreloaded", func(t *testing.T) {
+		comment := models.Comment{
+			ID: 1,
+			ProductID: 1,
+			Rating: 5,
+		}
+		product := models.Product{
+			ID: 1,
+			Rate: 0.0,
+			Comments: []models.Comment{},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Product)
+			*arg = product
+		}).Return(nil)
+		mockDB.On("Create", mock.AnythingOfType("*models.Comment")).Return(nil)
+		mockDB.On("FindPreloaded", "Comments", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Return(assert.AnError)
+		service := NewCommentService(mockDB)
+		err := service.CreateCommentService(comment)
+		require.Error(t, err)
+		mockDB.AssertExpectations(t)
+	})
 }
 
 func TestGetCommentsService(t *testing.T) {
@@ -316,4 +339,99 @@ func TestUpdateCommentService(t *testing.T) {
 		require.NoError(t, err)
 		mockDB.AssertExpectations(t)
 	})
+	t.Run("Error in UpdateProductRating with different product ID", func(t *testing.T) {
+		comment := models.Comment{
+			ID:        1,
+			ProductID: 2,
+			Rating:    5,
+		}
+		productForComment := models.Product{
+			ID: 2,
+			Rate: 0.0,
+			Comments: []models.Comment{},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("Save", mock.AnythingOfType("*models.Comment")).Return(nil)
+		mockDB.On("FindPreloaded", "Comments", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(1).(*models.Product)
+			*arg = productForComment
+		}).Return(assert.AnError)
+		service := NewCommentService(mockDB)
+		err := service.UpdateCommentService(comment, 1)
+		require.Error(t, err)
+		mockDB.AssertExpectations(t)
+	})
+}
+
+func TestDeleteCommentService(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		comment := models.Comment{
+			ID:        1,
+			ProductID: 1,
+			Rating:    5,
+		}
+		product := models.Product{
+			ID:       1,
+			Rate:     0.0,
+			Comments: []models.Comment{comment},
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Comment"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Comment)
+			*arg = comment
+		}).Return(nil)
+		mockDB.On("Delete", mock.AnythingOfType("*models.Comment")).Return(nil)
+		mockDB.On("FindPreloaded", "Comments", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(1).(*models.Product)
+			*arg = product
+		}).Return(nil)
+		mockDB.On("Save", mock.AnythingOfType("*models.Product")).Return(nil)
+		service := NewCommentService(mockDB)
+		err := service.DeleteCommentService(1)
+		require.NoError(t, err)
+		mockDB.AssertExpectations(t)
+	})
+	t.Run("Error First", func(t *testing.T) {
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Comment"), []interface{}{uint(1)}).Return(assert.AnError)
+		service := NewCommentService(mockDB)
+		err := service.DeleteCommentService(1)
+		require.Error(t, err)
+		mockDB.AssertExpectations(t)
+	})
+	t.Run("Error Delete", func(t *testing.T) {
+		comment := models.Comment{
+			ID:        1,
+			ProductID: 1,
+			Rating:    5,
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Comment"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Comment)
+			*arg = comment
+		}).Return(nil)
+		mockDB.On("Delete", mock.AnythingOfType("*models.Comment")).Return(assert.AnError)
+		service := NewCommentService(mockDB)
+		err := service.DeleteCommentService(1)
+		require.Error(t, err)
+		mockDB.AssertExpectations(t)
+	})
+	t.Run("Error FindPreloaded", func(t *testing.T) {
+		comment := models.Comment{
+			ID:        1,
+			ProductID: 1,
+			Rating:    5,
+		}
+		mockDB := new(MockDBClient)
+		mockDB.On("First", mock.AnythingOfType("*models.Comment"), []interface{}{uint(1)}).Run(func(args mock.Arguments) {
+			arg := args.Get(0).(*models.Comment)
+			*arg = comment
+		}).Return(nil)
+		mockDB.On("Delete", mock.AnythingOfType("*models.Comment")).Return(nil)
+		mockDB.On("FindPreloaded", "Comments", mock.AnythingOfType("*models.Product"), []interface{}{uint(1)}).Return(assert.AnError)
+		service := NewCommentService(mockDB)
+		err := service.DeleteCommentService(1)
+		require.Error(t, err)
+		mockDB.AssertExpectations(t)
+	})	
 }
