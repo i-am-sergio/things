@@ -1,0 +1,19 @@
+type Notification {
+  id: ID!
+  userId: String
+  title: String
+  message: String
+  image: String
+  isRead: Boolean
+  type: String
+  createdAt: String
+  updatedAt: String
+}
+
+type Query {
+  getNotificationById(id: ID!): Notification!
+}
+
+type Mutation {
+  createNotification(userId: String!, title: String!, message: String!, isRead: Boolean!): Notification!
+}
