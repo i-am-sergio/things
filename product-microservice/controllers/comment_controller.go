@@ -98,4 +98,3 @@ func (cx *CommentControllerImpl) DeleteComment(c echo.Context) error {
     }
     return c.JSON(http.StatusOK, map[string]string{"message": "Comment deleted"})
 }
-
