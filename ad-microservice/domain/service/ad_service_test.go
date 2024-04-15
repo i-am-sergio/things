@@ -11,22 +11,50 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Define una interfaz para el manejo de fechas.
+type Clock interface {
+	Now() time.Time
+}
+
+// Clock en tiempo real que implementa la interfaz Clock.
+type RealClock struct{}
+
+func (c *RealClock) Now() time.Time {
+	return time.Now()
+}
+
+// MockClock para pruebas que implementa la interfaz Clock.
+type MockClock struct {
+	NowFunc func() time.Time
+}
+
+func (m *MockClock) Now() time.Time {
+	if m.NowFunc != nil {
+		return m.NowFunc()
+	}
+	return time.Time{}
+}
+
 func TestCreateAdService(t *testing.T) {
 	// Crear una instancia del repositorio mock generado
 	mockRepo := new(mocks.AdRepository)
 
-	// Crear una instancia del servicio con el repositorio mock
+	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
+	clock := &MockClock{
+		NowFunc: func() time.Time {
+			return time.Date(2024, time.April, 16, 4, 40, 11, 701289262, time.UTC)
+		},
+	}
+
+	// Crear una instancia del servicio con el repositorio mock y el reloj falso
 	serviceAd := service.NewAdService(mockRepo)
 
-	// Crear una fecha específica para el anuncio de prueba
-	specificDate := time.Date(2024, time.April, 15, 0, 0, 0, 0, time.Local)
-
-	// Crear un nuevo anuncio de prueba con la fecha específica
+	// Crear un nuevo anuncio de prueba
 	newAd := models.Add{
 		ProductID: 123,
 		Price:     99.99,
 		Time:      60,
-		Date:      specificDate,
+		Date:      clock.Now().AddDate(0, 0, 1),
 		UserID:    456,
 		View:      100,
 	}
@@ -44,7 +72,7 @@ func TestCreateAdService(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 
 	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
-	createdAt := time.Now()
+	createdAt := clock.Now()
 	timeDiff := createdAt.Sub(newAd.Date)
 	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
@@ -53,7 +81,14 @@ func TestGetAddByIDProductService(t *testing.T) {
 	// Crear una instancia del repositorio mock generado
 	mockRepo := new(mocks.AdRepository)
 
-	// Crear una instancia del servicio con el repositorio mock
+	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
+	clock := &MockClock{
+		NowFunc: func() time.Time {
+			return time.Date(2024, time.April, 16, 4, 40, 11, 701289262, time.UTC)
+		},
+	}
+
+	// Crear una instancia del servicio con el repositorio mock y el reloj falso
 	serviceAd := service.NewAdService(mockRepo)
 
 	// ID del producto de prueba
@@ -64,7 +99,7 @@ func TestGetAddByIDProductService(t *testing.T) {
 		ProductID: 123,
 		Price:     99.99,
 		Time:      60,
-		Date:      time.Now(),
+		Date:      clock.Now(),
 		UserID:    456,
 		View:      100,
 	}
@@ -85,7 +120,7 @@ func TestGetAddByIDProductService(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 
 	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
-	createdAt := time.Now()
+	createdAt := clock.Now()
 	timeDiff := createdAt.Sub(mockAdd.Date)
 	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
@@ -94,7 +129,14 @@ func TestGetAllAdService(t *testing.T) {
 	// Crear una instancia del repositorio mock generado
 	mockRepo := new(mocks.AdRepository)
 
-	// Crear una instancia del servicio con el repositorio mock
+	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
+	clock := &MockClock{
+		NowFunc: func() time.Time {
+			return time.Date(2024, time.April, 16, 4, 40, 11, 701289262, time.UTC)
+		},
+	}
+
+	// Crear una instancia del servicio con el repositorio mock y el reloj falso
 	serviceAd := service.NewAdService(mockRepo)
 
 	// Crear una lista de anuncios de prueba para el mock
@@ -103,7 +145,7 @@ func TestGetAllAdService(t *testing.T) {
 			ProductID: 123,
 			Price:     99.99,
 			Time:      60,
-			Date:      time.Now(),
+			Date:      clock.Now(),
 			UserID:    456,
 			View:      100,
 		},
@@ -111,7 +153,7 @@ func TestGetAllAdService(t *testing.T) {
 			ProductID: 456,
 			Price:     199.99,
 			Time:      120,
-			Date:      time.Now().AddDate(0, 0, 1),
+			Date:      clock.Now().AddDate(0, 0, 1),
 			UserID:    789,
 			View:      200,
 		},
@@ -133,7 +175,7 @@ func TestGetAllAdService(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 
 	// Verificar que las fechas de los anuncios estén dentro de un margen de tiempo
-	createdAt := time.Now()
+	createdAt := clock.Now()
 	for _, ad := range *mockAds {
 		timeDiff := createdAt.Sub(ad.Date)
 		assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
@@ -144,7 +186,14 @@ func TestUpdateAddDataService(t *testing.T) {
 	// Crear una instancia del repositorio mock generado
 	mockRepo := new(mocks.AdRepository)
 
-	// Crear una instancia del servicio con el repositorio mock
+	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
+	clock := &MockClock{
+		NowFunc: func() time.Time {
+			return time.Date(2024, time.April, 16, 4, 40, 11, 701289262, time.UTC)
+		},
+	}
+
+	// Crear una instancia del servicio con el repositorio mock y el reloj falso
 	serviceAd := service.NewAdService(mockRepo)
 
 	// ID del producto de prueba
@@ -154,7 +203,7 @@ func TestUpdateAddDataService(t *testing.T) {
 	updatedAd := models.Add{
 		Price: 129.99,
 		Time:  90,
-		Date:  time.Now().AddDate(0, 0, 2),
+		Date:  clock.Now().AddDate(0, 0, 2),
 	}
 
 	// Anuncio de prueba para el mock
@@ -162,7 +211,7 @@ func TestUpdateAddDataService(t *testing.T) {
 		ProductID: 123,
 		Price:     99.99,
 		Time:      60,
-		Date:      time.Now(),
+		Date:      clock.Now(),
 		UserID:    456,
 		View:      100,
 	}
@@ -181,7 +230,7 @@ func TestUpdateAddDataService(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 
 	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
-	createdAt := time.Now()
+	createdAt := clock.Now()
 	timeDiff := createdAt.Sub(updatedAd.Date)
 	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
