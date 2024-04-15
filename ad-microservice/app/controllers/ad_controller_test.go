@@ -17,53 +17,87 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Define una interfaz para el manejo de fechas.
+type Clock interface {
+	Now() time.Time
+}
+
+// Clock en tiempo real que implementa la interfaz Clock.
+type RealClock struct{}
+
+func (c *RealClock) Now() time.Time {
+	return time.Now()
+}
+
+// MockClock para pruebas que implementa la interfaz Clock.
+type MockClock struct {
+	NowFunc func() time.Time
+}
+
+func (m *MockClock) Now() time.Time {
+	if m.NowFunc != nil {
+		return m.NowFunc()
+	}
+	return time.Time{}
+}
+
+// Ejemplo de cómo utilizar MockClock en una prueba.
 func TestCreateAdd_Success(t *testing.T) {
-	// Crear una instancia del servicio mock generado
+	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
+	clock := &MockClock{
+		NowFunc: func() time.Time {
+			return time.Date(2024, time.April, 16, 4, 40, 11, 701289262, time.UTC)
+		},
+	}
+
+	// Crear una instancia del servicio mock generado.
 	mockService := new(mocks.AdService)
 
-	// Creamos un nuevo anuncio para enviar al controlador
+	// Creamos un nuevo anuncio para enviar al controlador.
 	newAd := &models.Add{
 		ProductID: 123,
 		Price:     99.99,
 		Time:      60,
-		Date:      time.Now().AddDate(0, 0, 1), // Usar el mismo tiempo que se espera en el mock
+		Date:      clock.Now().AddDate(0, 0, 1), // Usar el mismo tiempo que se espera en el mock
 		UserID:    456,
 		View:      100,
 	}
 
-	// Convertir el anuncio a JSON
+	// Convertir el anuncio a JSON.
 	notificationJSON, _ := json.Marshal(newAd)
 
-	// Crear una instancia del controlador con el servicio mock
+	// Crear una instancia del controlador con el servicio mock.
 	controller := controllers.NewAdHandler(mockService)
 
-	// Crear una nueva solicitud HTTP para enviar al controlador
+	// Crear una nueva solicitud HTTP para enviar al controlador.
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	// Configurar el comportamiento esperado del mock
+	// Configurar el comportamiento esperado del mock.
 	mockService.On("CreateAdService", mock.AnythingOfType("models.Add")).Return(nil)
 
-	// Llamar al método del controlador que estamos probando
+	// Llamar al método del controlador que estamos probando.
 	err := controller.CreateAdd(ctx)
 
-	// Verificar que no haya errores
+	// Verificar que no haya errores.
 	assert.NoError(t, err)
-	// Verificar que la respuesta tenga el código de estado correcto
+	// Verificar que la respuesta tenga el código de estado correcto.
 	assert.Equal(t, http.StatusCreated, rec.Code)
-	// Verificar que se llamó al método del mock como se esperaba
+	// Verificar que se llamó al método del mock como se esperaba.
 	mockService.AssertExpectations(t)
-
-	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
-	createdAt := time.Now()
-	timeDiff := createdAt.Sub(newAd.Date)
-	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
 
 func TestGetAddByIdProductHandler(t *testing.T) {
+	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
+	clock := &MockClock{
+		NowFunc: func() time.Time {
+			return time.Date(2024, time.April, 16, 4, 40, 11, 701289262, time.UTC)
+		},
+	}
+
 	// Crear una instancia del servicio mock generado
 	mockService := new(mocks.AdService)
 
@@ -72,7 +106,7 @@ func TestGetAddByIdProductHandler(t *testing.T) {
 		ProductID: 123,
 		Price:     99.99,
 		Time:      60,
-		Date:      time.Now().AddDate(0, 0, 1),
+		Date:      clock.Now().AddDate(0, 0, 1), // Usar el mismo tiempo que se espera en el mock
 		UserID:    456,
 		View:      100,
 	}
