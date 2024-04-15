@@ -45,4 +45,3 @@
     ```bash
     docker compose down
     ```
-    
