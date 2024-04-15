@@ -19,3 +19,13 @@ type Notification struct {
 
 type Query struct {
 }
+
+type User struct {
+	IDAuth    *string `json:"idAuth,omitempty"`
+	Email     *string `json:"email,omitempty"`
+	Role      *string `json:"role,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Image     *string `json:"image,omitempty"`
+	Ubication *string `json:"ubication,omitempty"`
+	Password  *string `json:"password,omitempty"`
+}

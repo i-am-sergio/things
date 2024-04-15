@@ -10,8 +10,19 @@ type Notification {
   updatedAt: String
 }
 
+type User {
+  idAuth: String
+  email: String
+  role: String
+  name: String
+  image: String
+  ubication: String
+  password: String
+}
+
 type Query {
   getNotificationById(id: ID!): Notification!
+  getUserById(id_auth: String): User!
 }
 
 type Mutation {
