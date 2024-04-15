@@ -6,13 +6,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
-
-func main() {
-    if err := RunServer(); err != nil {
-        log.Fatal("failed to start the server: ", err)
-    }
-}
-
 func RunServer() error {
     cloudinary := &db.Cloudinary{
         Uploader: &db.CloudinaryUploaderAdapter{},
@@ -30,3 +23,10 @@ func RunServer() error {
     }
     return app.Run(":8002")
 }
+
+func main() {
+    if err := RunServer(); err != nil {
+        log.Fatal("failed to start the server: ", err)
+    }
+}
+
