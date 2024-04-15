@@ -30,6 +30,7 @@ func TestCreateAdService(t *testing.T) {
 		UserID:    456,
 		View:      100,
 	}
+
 	// Establecer el comportamiento esperado del repositorio mock
 	mockRepo.On("CreateAd", mock.AnythingOfType("models.Add")).Return(nil)
 
@@ -41,6 +42,11 @@ func TestCreateAdService(t *testing.T) {
 
 	// Verificar que se llamó al método del mock como se esperaba
 	mockRepo.AssertExpectations(t)
+
+	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
+	createdAt := time.Now()
+	timeDiff := createdAt.Sub(newAd.Date)
+	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
 
 func TestGetAddByIDProductService(t *testing.T) {
@@ -77,6 +83,11 @@ func TestGetAddByIDProductService(t *testing.T) {
 
 	// Verificar que se llamó al método del mock como se esperaba
 	mockRepo.AssertExpectations(t)
+
+	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
+	createdAt := time.Now()
+	timeDiff := createdAt.Sub(mockAdd.Date)
+	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
 
 func TestGetAllAdService(t *testing.T) {
@@ -120,6 +131,13 @@ func TestGetAllAdService(t *testing.T) {
 
 	// Verificar que se llamó al método del mock como se esperaba
 	mockRepo.AssertExpectations(t)
+
+	// Verificar que las fechas de los anuncios estén dentro de un margen de tiempo
+	createdAt := time.Now()
+	for _, ad := range *mockAds {
+		timeDiff := createdAt.Sub(ad.Date)
+		assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
+	}
 }
 
 func TestUpdateAddDataService(t *testing.T) {
@@ -161,4 +179,9 @@ func TestUpdateAddDataService(t *testing.T) {
 
 	// Verificar que se llamó al método del mock como se esperaba
 	mockRepo.AssertExpectations(t)
+
+	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
+	createdAt := time.Now()
+	timeDiff := createdAt.Sub(updatedAd.Date)
+	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }

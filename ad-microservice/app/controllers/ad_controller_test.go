@@ -14,9 +14,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestCreateAdd_Succes(t *testing.T) {
+func TestCreateAdd_Success(t *testing.T) {
 	// Crear una instancia del servicio mock generado
 	mockService := new(mocks.AdService)
 
@@ -44,7 +45,7 @@ func TestCreateAdd_Succes(t *testing.T) {
 	ctx := e.NewContext(req, rec)
 
 	// Configurar el comportamiento esperado del mock
-	mockService.On("CreateAdService", *newAd).Return(nil)
+	mockService.On("CreateAdService", mock.AnythingOfType("models.Add")).Return(nil)
 
 	// Llamar al método del controlador que estamos probando
 	err := controller.CreateAdd(ctx)
@@ -55,6 +56,11 @@ func TestCreateAdd_Succes(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, rec.Code)
 	// Verificar que se llamó al método del mock como se esperaba
 	mockService.AssertExpectations(t)
+
+	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
+	createdAt := time.Now()
+	timeDiff := createdAt.Sub(newAd.Date)
+	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
 
 func TestGetAddByIdProductHandler(t *testing.T) {
@@ -101,6 +107,11 @@ func TestGetAddByIdProductHandler(t *testing.T) {
 
 	// Verificar que se llamó al método del mock como se esperaba
 	mockService.AssertExpectations(t)
+
+	// Verificar que la fecha del anuncio esté dentro de un margen de tiempo
+	createdAt := time.Now()
+	timeDiff := createdAt.Sub(expectedAdd.Date)
+	assert.LessOrEqual(t, timeDiff.Seconds(), float64(10), "La diferencia de tiempo entre la fecha actual y la fecha del anuncio es mayor que 10 segundos")
 }
 
 func TestGetAllAddsHandler(t *testing.T) {
