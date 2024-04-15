@@ -12,11 +12,11 @@ import (
 
 // AdHandler maneja las solicitudes relacionadas con los ADS
 type AdHandler struct {
-	adService services.AdService
+	adService services.AdServiceInterface
 }
 
 // NewStudentHandler crea una nueva instancia de AdHandler
-func NewAdHandler(adService services.AdService) *AdHandler {
+func NewAdHandler(adService services.AdServiceInterface) *AdHandler {
 	return &AdHandler{
 		adService: adService,
 	}

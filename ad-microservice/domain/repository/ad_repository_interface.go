@@ -4,7 +4,7 @@ import (
 	"ad-microservice/domain/models"
 )
 
-type AdRepository interface {
+type AdRepositoryInterface interface {
 	ConnectDB() error
 	GetAddByIDProduct(productID string) (*models.Add, error)
 	GetAllAd() (*[]models.Add, error)

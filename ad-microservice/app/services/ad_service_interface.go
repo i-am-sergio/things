@@ -4,7 +4,7 @@ import (
 	"ad-microservice/domain/models"
 )
 
-type AdService interface {
+type AdServiceInterface interface {
 	CreateAdService(newAd models.Add) error
 	GetAddByIDProductService(productID string) (*models.Add, error)
 	GetAllAdService() (*[]models.Add, error)

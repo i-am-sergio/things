@@ -16,7 +16,7 @@ import (
 func main() {
 
 	// Inicializar la configuración de la base de datos MySQL
-	mysqlConfig := repositories.MySqlDB()
+	mysqlConfig := repositories.SetMysql()
 
 	// Conectar a la base de datos
 	if err := mysqlConfig.ConnectDB(); err != nil {
@@ -28,21 +28,14 @@ func main() {
 		fmt.Println("Error al migrar el modelo Add:", err)
 	}
 
-	// Inicializar el repositorio de anuncios de MySQL
-	var adRepo repositories.MySQLConfig = *mysqlConfig // Desreferenciar el puntero
-
 	// Inicializar el servicio de anuncios
-	adService := service.NewAdService(adRepo)
+	adService := service.NewAdService(mysqlConfig)
 
 	// Inicializar el manejador de anuncios
 	adHandler := controllers.NewAdHandler(adService)
 
 	// Inicializar Echo
 	e := echo.New()
-
-	// Middleware
-	//  e.Use(middleware.Logger())
-	//  e.Use(middleware.Recover())
 
 	// Ruta raíz
 	e.GET("/", func(c echo.Context) error {

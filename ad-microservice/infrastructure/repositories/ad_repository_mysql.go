@@ -22,9 +22,9 @@ type MySQLConfig struct {
 }
 
 // check implementation of interface
-var _ repository.AdRepository = &MySQLConfig{}
+var _ repository.AdRepositoryInterface = &MySQLConfig{}
 
-func MySqlDB() *MySQLConfig {
+func SetMysql() *MySQLConfig {
 	return &MySQLConfig{
 		Host:     "roundhouse.proxy.rlwy.net",
 		Port:     "58427",

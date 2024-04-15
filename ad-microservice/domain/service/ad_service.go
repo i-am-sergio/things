@@ -6,29 +6,23 @@ import (
 
 	"ad-microservice/app/services"
 	"ad-microservice/domain/models"
-	"ad-microservice/infrastructure/repositories"
+	"ad-microservice/domain/repository"
 )
 
 type adService struct {
-	adRepo repositories.MySQLConfig
-	ads    map[string]models.Add
+	adRepo repository.AdRepositoryInterface
 }
 
 // constructor
-func NewAdService(repo ...repositories.MySQLConfig) services.AdService {
-	if len(repo) > 0 {
-		return &adService{
-			adRepo: repo[0],
-		}
-	}
+func NewAdService(repo repository.AdRepositoryInterface) *adService {
 	return &adService{
-		ads: make(map[string]models.Add),
+		adRepo: repo,
 	}
 }
 
 // METHODS
 // check implementation of interface
-var _ services.AdService = &adService{}
+var _ services.AdServiceInterface = &adService{}
 
 func (s *adService) CreateAdService(newAd models.Add) error {
 	// Establecer la hora de creación
