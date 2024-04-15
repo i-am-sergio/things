@@ -14,21 +14,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 type MockRealDBInit struct {
-    mock.Mock
+	mock.Mock
 }
+
 func (m *MockRealDBInit) Init(loader db.EnvLoader, connector db.DBConnector) (repository.DBInterface, error) {
-    args := m.Called(loader, connector)
+	args := m.Called(loader, connector)
 	return args.Get(0).(repository.DBInterface), args.Error(1)
 }
 
 type MockCloudinary struct {
-    mock.Mock
+	mock.Mock
 }
+
 func (m *MockCloudinary) InitCloudinary(loader db.EnvLoader) error {
-    args := m.Called(loader)
-    return args.Error(0)
+	args := m.Called(loader)
+	return args.Error(0)
 }
 
 func (m *MockCloudinary) UploadImage(imagePath db.FileHeaderWrapper) (string, error) {
@@ -37,12 +38,12 @@ func (m *MockCloudinary) UploadImage(imagePath db.FileHeaderWrapper) (string, er
 }
 
 type MockDBInterface struct {
-    mock.Mock
+	mock.Mock
 }
 
 func (m *MockDBInterface) AutoMigrate(dst ...interface{}) error {
-    args := m.Called(dst...)
-    return args.Error(0)
+	args := m.Called(dst...)
+	return args.Error(0)
 }
 
 func (m *MockDBInterface) First(dest interface{}, conds ...interface{}) error {
@@ -91,35 +92,35 @@ func (m *MockDBInterface) DeleteByID(model interface{}, id interface{}) error {
 }
 
 func TestAppInitialize(t *testing.T) {
-    t.Run("Success", func(t *testing.T) {
-        mockDB := new(MockRealDBInit)
+	t.Run("Success", func(t *testing.T) {
+		mockDB := new(MockRealDBInit)
 		mockDBInterface := new(MockDBInterface)
-        mockCloudinary := new(MockCloudinary)
+		mockCloudinary := new(MockCloudinary)
 		e := echo.New()
-        app := &App{
-            DB:          mockDB,
-            Cloudinary:  mockCloudinary,
-            HTTPHandler: e,
-        }
+		app := &App{
+			DB:          mockDB,
+			Cloudinary:  mockCloudinary,
+			HTTPHandler: e,
+		}
 		mockDB.On("Init", mock.AnythingOfType("*db.DotEnvLoader"), mock.AnythingOfType("*db.GormConnector")).Return(mockDBInterface, nil)
-        mockDBInterface.On("AutoMigrate", mock.AnythingOfType("*models.Product"), mock.AnythingOfType("*models.Comment")).Return(nil)
+		mockDBInterface.On("AutoMigrate", mock.AnythingOfType("*models.Product"), mock.AnythingOfType("*models.Comment")).Return(nil)
 		mockCloudinary.On("InitCloudinary", mock.AnythingOfType("*db.DotEnvLoader")).Return(nil)
 		err := app.Initialize()
 		require.NoError(t, err)
 		mockDB.AssertExpectations(t)
 		mockDBInterface.AssertExpectations(t)
 		mockCloudinary.AssertExpectations(t)
-    })
+	})
 	t.Run("ErrorDBInit", func(t *testing.T) {
 		mockDB := new(MockRealDBInit)
 		mockDBInterface := new(MockDBInterface)
-        mockCloudinary := new(MockCloudinary)
+		mockCloudinary := new(MockCloudinary)
 		e := echo.New()
-        app := &App{
-            DB:          mockDB,
-            Cloudinary:  mockCloudinary,
-            HTTPHandler: e,
-        }
+		app := &App{
+			DB:          mockDB,
+			Cloudinary:  mockCloudinary,
+			HTTPHandler: e,
+		}
 		mockDB.On("Init", mock.AnythingOfType("*db.DotEnvLoader"), mock.AnythingOfType("*db.GormConnector")).Return(mockDBInterface, errors.New("error al inicializar la base de datos"))
 		err := app.Initialize()
 		require.Error(t, err)
@@ -191,18 +192,12 @@ func TestAppRun(t *testing.T) {
 	})
 	t.Run("Error", func(t *testing.T) {
 		e := echo.New()
-        app := &App{
-            HTTPHandler: e,
-        }
-        err := app.Run(":-1")
-        if err == nil {
-            t.Fatal("Expected an error when trying to run the server, but got nil")
-        }
+		app := &App{
+			HTTPHandler: e,
+		}
+		err := app.Run(":-1")
+		if err == nil {
+			t.Fatal("Expected an error when trying to run the server, but got nil")
+		}
 	})
 }
-
-// func TestRunApp(t *testing.T) {
-// 	t.Run("Success", func(t *testing.T) {
-		
-// 	})
-// }
