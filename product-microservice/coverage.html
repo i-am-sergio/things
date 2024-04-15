@@ -1,0 +1,1030 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>controllers: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">product-microservice/controllers/comment_controller.go (100.0%)</option>
+				
+				<option value="file1">product-microservice/controllers/product_controller.go (100.0%)</option>
+				
+				<option value="file2">product-microservice/db/cloudinary.go (100.0%)</option>
+				
+				<option value="file3">product-microservice/db/connection.go (100.0%)</option>
+				
+				<option value="file4">product-microservice/main.go (68.2%)</option>
+				
+				<option value="file5">product-microservice/models/comment_model.go (100.0%)</option>
+				
+				<option value="file6">product-microservice/models/product_model.go (100.0%)</option>
+				
+				<option value="file7">product-microservice/repository/db_repository.go (100.0%)</option>
+				
+				<option value="file8">product-microservice/routes/comment_routes.go (100.0%)</option>
+				
+				<option value="file9">product-microservice/routes/products_routes.go (100.0%)</option>
+				
+				<option value="file10">product-microservice/services/comment_service.go (100.0%)</option>
+				
+				<option value="file11">product-microservice/services/product_service.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package controllers
+
+import (
+        "net/http"
+        "product-microservice/models"
+        "product-microservice/services"
+        "strconv"
+
+        "github.com/labstack/echo/v4"
+)
+
+const invalidCommentIDError = "Invalid comment ID"
+
+type CommentController interface {
+    CreateComment(c echo.Context) error
+    GetComments(c echo.Context) error
+    GetCommentByID(c echo.Context) error
+    GetCommentsByProductID(c echo.Context) error
+    UpdateComment(c echo.Context) error
+    DeleteComment(c echo.Context) error
+}
+type CommentControllerImpl struct {
+    CommentService services.CommentService
+}
+func NewCommentController(commentService services.CommentService) *CommentControllerImpl <span class="cov8" title="1">{
+    return &amp;CommentControllerImpl{CommentService: commentService}
+}</span>
+
+func (cx *CommentControllerImpl) CreateComment(c echo.Context) error <span class="cov8" title="1">{
+    var comment models.Comment
+    if err := c.Bind(&amp;comment); err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">if err := cx.CommentService.CreateCommentService(comment); err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">return c.JSON(http.StatusCreated, comment)</span>
+}
+
+func (cx *CommentControllerImpl) GetComments(c echo.Context) error <span class="cov8" title="1">{
+    comments, err := cx.CommentService.GetCommentsService()
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">return c.JSON(http.StatusOK, comments)</span>
+}
+
+func (cx *CommentControllerImpl) GetCommentByID(c echo.Context) error <span class="cov8" title="1">{
+    ID, err := strconv.Atoi(c.Param("id")) 
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+    }</span>
+    <span class="cov8" title="1">getComment, err := cx.CommentService.GetCommentByIDService(uint(ID))
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">return c.JSON(http.StatusOK, getComment)</span>
+}
+
+func (cx *CommentControllerImpl) GetCommentsByProductID(c echo.Context) error <span class="cov8" title="1">{
+    ID, err := strconv.Atoi(c.Param("id")) 
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+    }</span>
+    <span class="cov8" title="1">comments, err := cx.CommentService.GetCommentsByProductIDService(uint(ID))
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">return c.JSON(http.StatusOK, comments)</span>
+}
+
+func (cx *CommentControllerImpl) UpdateComment(c echo.Context) error <span class="cov8" title="1">{
+    commentID, err := strconv.Atoi(c.Param("id"))
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+    }</span>
+    <span class="cov8" title="1">comment, err := cx.CommentService.GetCommentByIDService(uint(commentID))
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusNotFound, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">befProduct := comment.ProductID
+    if err := c.Bind(&amp;comment); err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">if err := cx.CommentService.UpdateCommentService(comment, uint(befProduct)); err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">return c.JSON(http.StatusOK, comment)</span>
+}
+
+func (cx *CommentControllerImpl) DeleteComment(c echo.Context) error <span class="cov8" title="1">{
+    commentID, err := strconv.Atoi(c.Param("id"))
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+    }</span>
+    <span class="cov8" title="1">if err := cx.CommentService.DeleteCommentService(uint(commentID)); err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+    }</span>
+    <span class="cov8" title="1">return c.JSON(http.StatusOK, map[string]string{"message": "Comment deleted"})</span>
+}</pre>
+		
+		<pre class="file" id="file1" style="display: none">package controllers
+
+import (
+        "mime/multipart"
+        "net/http"
+        "product-microservice/services"
+        "strconv"
+
+        "github.com/labstack/echo/v4"
+)
+type ProductController interface {
+        CreateProduct(c echo.Context) error
+        UpdateProduct(c echo.Context) error
+        GetProducts(c echo.Context) error
+        GetProductsById(c echo.Context) error
+        GetProductsByCategory(c echo.Context) error
+        SearchProducts(c echo.Context) error
+        DeleteProduct(c echo.Context) error
+        Premium(c echo.Context) error
+        GetProductsPremium(c echo.Context) error
+}
+type ProductControllerImpl struct {
+        ProductService services.ProductService
+}
+func NewProductController(productService services.ProductService) *ProductControllerImpl <span class="cov8" title="1">{
+        return &amp;ProductControllerImpl{ProductService: productService}
+}</span>
+
+func (cx *ProductControllerImpl) CreateProduct(c echo.Context) error <span class="cov8" title="1">{
+        form, err := c.MultipartForm()
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">file, err := c.FormFile("image")
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">product,err := cx.ProductService.CreateProductService(form, file)
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusCreated, product)</span>
+}
+
+func (cx *ProductControllerImpl) UpdateProduct(c echo.Context)  error <span class="cov8" title="1">{
+        id, err := strconv.Atoi(c.Param("id")) 
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+        }</span>
+        <span class="cov8" title="1">form, err := c.MultipartForm()
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">var image *multipart.FileHeader
+        file, err := c.FormFile("image")
+        if err == nil </span><span class="cov8" title="1">{
+                image = file
+        }</span>
+        <span class="cov8" title="1">product, err := cx.ProductService.UpdateProductService(uint(id), form, image)
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, product)</span>
+}
+
+func (cx *ProductControllerImpl) GetProducts(c echo.Context) error <span class="cov8" title="1">{
+        products, err := cx.ProductService.GetProductsService()
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, products)</span>
+}
+
+func (cx *ProductControllerImpl) GetProductsById(c echo.Context) error <span class="cov8" title="1">{
+        id, err := strconv.Atoi(c.Param("id")) 
+    if err != nil </span><span class="cov8" title="1">{
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+    }</span>
+        <span class="cov8" title="1">product, err := cx.ProductService.GetProductByIDService(uint(id))
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, product)</span>
+}
+
+func (cx *ProductControllerImpl) GetProductsByCategory(c echo.Context) error <span class="cov8" title="1">{
+    category := c.QueryParam("category")
+        products, err := cx.ProductService.GetProductsByCategoryService(category)
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, products)</span>
+}
+
+func (cx *ProductControllerImpl) SearchProducts(c echo.Context) error <span class="cov8" title="1">{
+    searchTerm := c.QueryParam("q")
+        products, err := cx.ProductService.SearchProductsService(searchTerm)
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, products)</span>
+}
+
+func (cx *ProductControllerImpl) DeleteProduct(c echo.Context) error <span class="cov8" title="1">{
+        productID, err := strconv.Atoi(c.Param("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+        }</span>
+        <span class="cov8" title="1">if err := cx.ProductService.DeleteProductService(uint(productID)); err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, map[string]string{"message": "Product deleted successfully"})</span>
+}
+
+func (cx *ProductControllerImpl) Premium(c echo.Context) error <span class="cov8" title="1">{
+        id, err := strconv.Atoi(c.Param("id"))
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": invalidCommentIDError})
+        }</span>
+        <span class="cov8" title="1">product, err := cx.ProductService.PremiumService(uint(id))
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, product)</span>
+}
+
+func (cx *ProductControllerImpl) GetProductsPremium(c echo.Context) error <span class="cov8" title="1">{
+        products, err := cx.ProductService.GetProductsPremiumService()
+        if err != nil </span><span class="cov8" title="1">{
+                return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+        }</span>
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, products)</span>
+}</pre>
+		
+		<pre class="file" id="file2" style="display: none">package db
+
+import (
+        "context"
+        "fmt"
+        "mime/multipart"
+        "os"
+        "path/filepath"
+        "time"
+
+        "github.com/cloudinary/cloudinary-go/v2"
+        "github.com/cloudinary/cloudinary-go/v2/api"
+        "github.com/cloudinary/cloudinary-go/v2/api/uploader"
+)
+
+type CloudinaryAPI interface {
+        NewFromParams(cloudName, apiKey, apiSecret string) (*cloudinary.Cloudinary, error)
+}
+type CloudinaryService struct{}
+func (cs *CloudinaryService) NewFromParams(cloudName, apiKey, apiSecret string) (*cloudinary.Cloudinary, error) <span class="cov8" title="1">{
+        return cloudinary.NewFromParams(cloudName, apiKey, apiSecret)
+}</span>
+
+type CloudinaryUploader interface {
+        Upload(ctx context.Context, file multipart.File, params uploader.UploadParams) (*uploader.UploadResult, error)
+}
+type CloudinaryUploaderAdapter struct {
+        Cld *cloudinary.Cloudinary
+}
+func (cua *CloudinaryUploaderAdapter) Upload(ctx context.Context, file multipart.File, params uploader.UploadParams) (*uploader.UploadResult, error) <span class="cov8" title="1">{
+        return cua.Cld.Upload.Upload(ctx, file, params)
+}</span>
+
+type FileHeaderWrapper interface {
+        Open() (multipart.File, error)
+    Filename() string
+}
+type MultipartFileHeaderAdapter struct {
+    *multipart.FileHeader
+}
+func (fha *MultipartFileHeaderAdapter) Open() (multipart.File, error) <span class="cov8" title="1">{
+    return fha.FileHeader.Open()
+}</span>
+func (fha *MultipartFileHeaderAdapter) Filename() string <span class="cov8" title="1">{
+    return fha.FileHeader.Filename
+}</span>
+
+
+type CloudinaryClient interface {
+        InitCloudinary(envLoader EnvLoader) error
+        UploadImage(file FileHeaderWrapper) (string, error)
+}
+
+type Cloudinary struct {
+        Uploader  CloudinaryUploader
+        Context   context.Context
+        API       CloudinaryAPI
+}
+
+func (c *Cloudinary) InitCloudinary(envLoader EnvLoader) error <span class="cov8" title="1">{
+    err := envLoader.LoadEnv(".env")
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("error loading .env file: %w", err)
+        }</span>
+    <span class="cov8" title="1">cloudName := os.Getenv("CLOUDINARY_CLOUD_NAME")
+        apiKey := os.Getenv("CLOUDINARY_API_KEY")
+        apiSecret := os.Getenv("CLOUDINARY_API_SECRET")
+    cld, err := c.API.NewFromParams(cloudName, apiKey, apiSecret)
+    if err != nil </span><span class="cov8" title="1">{
+        return fmt.Errorf("error cloudinary setup: %w", err)
+    }</span>
+    <span class="cov8" title="1">cld.Config.URL.Secure = true
+    c.Uploader = &amp;CloudinaryUploaderAdapter{Cld: cld}
+        c.Context = context.Background()
+    return nil</span>
+}
+
+func (c *Cloudinary) UploadImage(file FileHeaderWrapper) (string, error)<span class="cov8" title="1">{
+        src, err := file.Open()
+    if err != nil </span><span class="cov8" title="1">{
+        return "", err
+    }</span>
+    <span class="cov8" title="1">defer src.Close()
+    filename := filepath.Base(file.Filename())
+        filenameWithoutExt := filename[:len(filename)-len(filepath.Ext(filename))]
+    currentTime := time.Now().Format("20060102150405")
+    publicID := fmt.Sprintf("%s_%s", currentTime, filenameWithoutExt)
+        uploadParams := uploader.UploadParams{
+        Folder:             "products/",
+        PublicID:           publicID,
+        UniqueFilename:     api.Bool(true),
+        Overwrite:          api.Bool(true),
+    }
+        uploadResult, err := c.Uploader.Upload(c.Context, src, uploadParams)
+    if err != nil </span><span class="cov8" title="1">{
+        return "", err
+    }</span>
+        <span class="cov8" title="1">return uploadResult.SecureURL, nil</span>
+}</pre>
+		
+		<pre class="file" id="file3" style="display: none">package db
+
+import (
+        "fmt"
+        "os"
+        "product-microservice/repository"
+
+        "github.com/joho/godotenv"
+        "gorm.io/driver/mysql"
+        "gorm.io/gorm"
+)
+
+type DBConnector interface {
+    Open(dsn string) (*gorm.DB, error)
+}
+type GormConnector struct{}
+func (g *GormConnector) Open(dsn string) (*gorm.DB, error) <span class="cov8" title="1">{
+    return gorm.Open(mysql.Open(dsn), &amp;gorm.Config{})
+}</span>
+
+type EnvLoader interface {
+    LoadEnv(filePath string) error
+}
+type DotEnvLoader struct{}
+func (d *DotEnvLoader) LoadEnv(filePath string) error <span class="cov8" title="1">{
+    return godotenv.Load(filePath)
+}</span>
+
+type ConnectionRepository struct {
+    EnvLoader   EnvLoader
+    DBConnector DBConnector
+}
+func NewConnectionRepository(envLoader EnvLoader, dbConnector DBConnector) *ConnectionRepository <span class="cov8" title="1">{
+    return &amp;ConnectionRepository{
+        EnvLoader:   envLoader,
+        DBConnector: dbConnector,
+    }
+}</span>
+
+func (cr *ConnectionRepository) Init() (*gorm.DB, error) <span class="cov8" title="1">{
+        if err := cr.EnvLoader.LoadEnv(".env"); err != nil </span><span class="cov8" title="1">{
+        return nil, fmt.Errorf("error loading .env file: %v", err)
+    }</span>
+        <span class="cov8" title="1">DSN := os.Getenv("DB_DSN")
+        db, err := cr.DBConnector.Open(DSN)
+    if err != nil </span><span class="cov8" title="1">{
+        return nil, fmt.Errorf("failed to connect to database: %v", err)
+    }</span>
+        <span class="cov8" title="1">fmt.Println("Connected to database.")
+    return db, nil</span>
+}
+
+type RealDBInit interface{
+    Init(envLoader EnvLoader, dbConnector DBConnector) (repository.DBInterface, error)
+}
+
+type RealDBInitImpl struct{}
+
+func (r *RealDBInitImpl) Init(envLoader EnvLoader, dbConnector DBConnector) (repository.DBInterface, error) <span class="cov8" title="1">{
+        repo := NewConnectionRepository(envLoader, dbConnector)
+    db, err := repo.Init()
+    if err != nil </span><span class="cov8" title="1">{
+        return nil, fmt.Errorf("failed to initialize database: %v", err)
+    }</span>
+        <span class="cov8" title="1">gormClient := &amp;repository.GormDBClient{
+        DB: db,        
+    }
+    var Client repository.DBInterface = gormClient
+    return Client, nil</span>
+}</pre>
+		
+		<pre class="file" id="file4" style="display: none">package main
+
+import (
+        "fmt"
+        "log"
+        "product-microservice/controllers"
+        "product-microservice/db"
+        "product-microservice/models"
+        "product-microservice/routes"
+        "product-microservice/services"
+
+        "github.com/labstack/echo/v4"
+)
+
+type App struct {
+        DB          db.RealDBInit
+        Cloudinary  db.CloudinaryClient
+        HTTPHandler *echo.Echo
+}
+
+func (a *App) Initialize() error <span class="cov8" title="1">{
+        sql, err := a.DB.Init(&amp;db.DotEnvLoader{},&amp;db.GormConnector{})
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to initialize DataBase: %w", err)
+        }</span>
+        <span class="cov8" title="1">if err := sql.AutoMigrate(&amp;models.Product{}, &amp;models.Comment{}); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("error AutoMigrate: %w", err)
+        }</span>
+        <span class="cov8" title="1">if err := a.Cloudinary.InitCloudinary(&amp;db.DotEnvLoader{}); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to initialize Cloudinary: %w", err)
+        }</span>
+        <span class="cov8" title="1">productService := services.NewProductService(sql, a.Cloudinary)
+        commentService := services.NewCommentService(sql)
+        productController := controllers.NewProductController(productService)
+        commentController := controllers.NewCommentController(commentService)
+        routes.ProductRoutes(a.HTTPHandler, productController)
+        routes.CommentRoutes(a.HTTPHandler, commentController)
+        return nil</span>
+}
+
+func (a *App) Run(port string) error <span class="cov8" title="1">{
+        return a.HTTPHandler.Start(port)
+}</span>
+
+func main() <span class="cov0" title="0">{
+        cloudinary := &amp;db.Cloudinary{
+        Uploader: &amp;db.CloudinaryUploaderAdapter{},
+        API:      &amp;db.CloudinaryService{},
+    }
+        e := echo.New()
+        app := &amp;App{
+                DB:          &amp;db.RealDBInitImpl{},
+                Cloudinary:  cloudinary,
+                HTTPHandler: e,
+        }
+        if err := app.Initialize(); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to initialize the application: %v", err)
+        }</span>
+        <span class="cov0" title="0">if err := app.Run(":8002"); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to start the server: %v", err)
+        }</span>
+}</pre>
+		
+		<pre class="file" id="file5" style="display: none">package models
+
+import (
+        "gorm.io/gorm"
+)
+
+type Comment struct {
+        gorm.Model
+        ID        uint    `gorm:"primaryKey" validate:"required" json:"id"`
+        UserID    uint    `gorm:"index:idx_user_product" validate:"required" json:"user_id"`
+        ProductID uint    `gorm:"index:idx_user_product" validate:"required" json:"product_id"`
+        Comment   string  `validate:"required,min=1,max=1000" json:"comment"`
+        Rating    float64 `validate:"required,gte=0,lte=5" json:"rating"`
+}
+
+func (c *Comment) TableName() string <span class="cov8" title="1">{
+        return "comments"
+}</pre>
+		
+		<pre class="file" id="file6" style="display: none">package models
+
+import (
+        "gorm.io/gorm"
+)
+
+type Product struct {
+    gorm.Model
+    ID          uint    `gorm:"primaryKey;unique" json:"ID"`
+        UserID      uint    `gorm:"index" json:"user_id" validate:"required"`
+    State       bool    `gorm:"default:true" json:"state" `
+    Status      bool    `gorm:"default:false" json:"status" validate:"required"`
+    Name        string  `json:"name" validate:"required,min=5,max=100"`
+    Description string  `json:"description" validate:"required,min=10,max=1000"`
+    Image       string  `json:"image" validate:"required"`
+    Category    string  `json:"category" validate:"required"`
+    Price       float64 `json:"price" validate:"required,min=0"`
+        Rate        float64 `gorm:"default:0.0" json:"rate" validate:"required,gte=0,lte=5"`
+    Ubication   string  `json:"ubication" validate:"required,min=1"`
+    Comments    []Comment `gorm:"foreignKey:ProductID" json:"comments" validate:"dive"`
+}
+
+func (p *Product) TableName() string <span class="cov8" title="1">{
+    return "products"
+}</pre>
+		
+		<pre class="file" id="file7" style="display: none">package repository
+
+import "gorm.io/gorm"
+
+type DBInterface interface {
+        AutoMigrate(dst ...interface{}) error
+        First(dest interface{}, conds ...interface{}) error
+        Save(value interface{}) error
+        Create(value interface{}) error
+        FindPreloaded(relation string, dest interface{}, conds ...interface{}) error
+        Find(dest interface{}, conds ...interface{}) error
+        FindWithCondition(dest interface{}, query string, args ...interface{}) error
+        Delete(value interface{}) error
+        DeleteWithCondition(model interface{}, query string, args ...interface{}) error
+        DeleteByID(model interface{}, id interface{}) error
+}
+
+type GormDBClient struct {
+    DB *gorm.DB
+}
+func NewGormDBClient(db *gorm.DB) *GormDBClient <span class="cov8" title="1">{
+    return &amp;GormDBClient{DB: db}
+}</span>
+
+func (g *GormDBClient) AutoMigrate(models ...interface{}) error <span class="cov8" title="1">{
+        return g.DB.AutoMigrate(models...)
+}</span>
+
+func (g *GormDBClient) First(dest interface{}, conds ...interface{}) error <span class="cov8" title="1">{
+        return g.DB.First(dest, conds...).Error
+}</span>
+
+func (g *GormDBClient) Save(value interface{}) error <span class="cov8" title="1">{
+        return g.DB.Save(value).Error
+}</span>
+
+func (g *GormDBClient) Create(value interface{}) error <span class="cov8" title="1">{
+        return g.DB.Create(value).Error
+}</span>
+
+func (g *GormDBClient) FindPreloaded(relation string, dest interface{}, conds ...interface{}) error <span class="cov8" title="1">{
+        return g.DB.Preload(relation).Find(dest, conds...).Error
+}</span>
+
+func (g *GormDBClient) Find(dest interface{}, conds ...interface{}) error <span class="cov8" title="1">{
+        return g.DB.Find(dest, conds...).Error
+}</span>
+
+func (g *GormDBClient) FindWithCondition(dest interface{}, query string, args ...interface{}) error <span class="cov8" title="1">{
+        return g.DB.Where(query, args...).Find(dest).Error
+}</span>
+
+func (g *GormDBClient) Delete(value interface{}) error <span class="cov8" title="1">{
+        return g.DB.Delete(value).Error
+}</span>
+
+func (g *GormDBClient) DeleteWithCondition(model interface{}, query string, args ...interface{}) error <span class="cov8" title="1">{
+        return g.DB.Where(query, args...).Delete(model).Error
+}</span>
+
+func (g *GormDBClient) DeleteByID(model interface{}, id interface{}) error <span class="cov8" title="1">{
+        return g.DB.Delete(model, id).Error
+}</pre>
+		
+		<pre class="file" id="file8" style="display: none">package routes
+
+import (
+        "product-microservice/controllers"
+
+        "github.com/labstack/echo/v4"
+)
+
+func CommentRoutes(e *echo.Echo, c controllers.CommentController) <span class="cov8" title="1">{
+        comments := e.Group("/comments")
+        comments.POST("", c.CreateComment)
+        comments.GET("", c.GetComments)
+        comments.GET("/:id", c.GetCommentByID)
+        comments.GET("/products/:id", c.GetCommentsByProductID)
+        comments.DELETE("/:id", c.DeleteComment)
+        comments.PUT("/:id", c.UpdateComment)
+}</pre>
+		
+		<pre class="file" id="file9" style="display: none">package routes
+
+import (
+        "product-microservice/controllers"
+
+        "github.com/labstack/echo/v4"
+)
+
+func ProductRoutes(e *echo.Echo, c controllers.ProductController) <span class="cov8" title="1">{
+        products := e.Group("/products")
+        products.POST("", c.CreateProduct)
+        products.GET("", c.GetProducts)
+        products.GET("/:id", c.GetProductsById)
+        products.GET("", c.GetProductsByCategory)
+        products.GET("/search", c.SearchProducts)
+        products.PUT("/:id", c.UpdateProduct)
+        products.DELETE("/:id", c.DeleteProduct)
+        products.PUT("/:id/premium", c.Premium)
+        products.GET("/premium", c.GetProductsPremium)
+}</pre>
+		
+		<pre class="file" id="file10" style="display: none">package services
+
+import (
+        "product-microservice/models"
+        "product-microservice/repository"
+)
+
+type CommentService interface {
+        UpdateProductRating(productID uint) error
+        CreateCommentService(comment models.Comment) error
+        GetCommentsService() ([]models.Comment, error)
+        GetCommentByIDService(id uint) (models.Comment, error)
+        GetCommentsByProductIDService(id uint) ([]models.Comment, error)
+        UpdateCommentService(comment models.Comment, id uint) error
+        DeleteCommentService(id uint) error
+}
+type CommentServiceImpl struct {
+        dbClient repository.DBInterface
+}
+func NewCommentService(client repository.DBInterface) *CommentServiceImpl <span class="cov8" title="1">{
+        return &amp;CommentServiceImpl{dbClient: client}
+}</span>
+
+func (c *CommentServiceImpl) UpdateProductRating(productID uint) error <span class="cov8" title="1">{
+    var product models.Product
+    if err := c.dbClient.FindPreloaded("Comments",&amp;product,productID); err != nil </span><span class="cov8" title="1">{
+        return err
+    }</span>
+    <span class="cov8" title="1">if len(product.Comments) == 0 </span><span class="cov8" title="1">{
+        product.Rate = 0
+    }</span> else<span class="cov8" title="1"> {
+        var totalRating float64
+        for _, comment := range product.Comments </span><span class="cov8" title="1">{
+            totalRating += comment.Rating
+        }</span>
+        <span class="cov8" title="1">product.Rate = totalRating / float64(len(product.Comments))</span>
+    }
+    <span class="cov8" title="1">if err := c.dbClient.Save(&amp;product); err != nil </span><span class="cov8" title="1">{
+        return err
+    }</span>
+    <span class="cov8" title="1">return nil</span>
+}
+
+func (c *CommentServiceImpl) CreateCommentService(comment models.Comment) error <span class="cov8" title="1">{
+        var product models.Product
+        if err := c.dbClient.First(&amp;product, comment.ProductID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := c.dbClient.Create(&amp;comment); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := c.UpdateProductRating(comment.ProductID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *CommentServiceImpl) GetCommentsService() ([]models.Comment, error) <span class="cov8" title="1">{
+        var comments []models.Comment
+        if err := c.dbClient.Find(&amp;comments); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return comments, nil</span>
+}
+
+func (c *CommentServiceImpl) GetCommentByIDService(id uint) (models.Comment, error) <span class="cov8" title="1">{
+        var comment models.Comment
+        if err := c.dbClient.First(&amp;comment, id); err != nil </span><span class="cov8" title="1">{
+                return comment, err
+        }</span>
+        <span class="cov8" title="1">return comment, nil</span>
+}
+
+func (c *CommentServiceImpl) GetCommentsByProductIDService(id uint) ([]models.Comment, error) <span class="cov8" title="1">{
+        var comments []models.Comment
+        if err := c.dbClient.FindWithCondition(&amp;comments,"product_id = ?", id); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return comments, nil</span>
+}
+
+func (c *CommentServiceImpl) UpdateCommentService(comment models.Comment, id uint) error <span class="cov8" title="1">{
+        if err := c.dbClient.Save(&amp;comment); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if(id != uint(comment.ProductID))</span><span class="cov8" title="1">{
+                if err := c.UpdateProductRating(uint(id)); err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">if err := c.UpdateProductRating(comment.ProductID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *CommentServiceImpl) DeleteCommentService(id uint) error <span class="cov8" title="1">{
+        var comment models.Comment
+        if err := c.dbClient.First(&amp;comment, id); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := c.dbClient.Delete(&amp;comment); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := c.UpdateProductRating(comment.ProductID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}</pre>
+		
+		<pre class="file" id="file11" style="display: none">package services
+
+import (
+        "fmt"
+        "mime/multipart"
+        "product-microservice/db"
+        "product-microservice/models"
+        "product-microservice/repository"
+        "strconv"
+)
+
+type ProductService interface {
+        CreateProductService(form *multipart.Form, image *multipart.FileHeader) (models.Product, error)
+        UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error)
+        GetProductsService() ([]models.Product, error)
+        GetProductByIDService(id uint) (models.Product, error)
+        GetProductsByCategoryService(category string) ([]models.Product, error)
+        SearchProductsService(searchTerm string) ([]models.Product, error)
+        DeleteProductService(productID uint) error
+        PremiumService(productID uint) (models.Product, error)
+        GetProductsPremiumService() ([]models.Product, error)
+}
+type ProductServiceImpl struct {
+        dbClient repository.DBInterface
+        cloudinaryClient db.CloudinaryClient
+}
+func NewProductService(client repository.DBInterface, cloudinary db.CloudinaryClient) *ProductServiceImpl <span class="cov8" title="1">{
+        return &amp;ProductServiceImpl{dbClient: client, cloudinaryClient: cloudinary}
+}</span>
+
+func validateRequiredFields(form *multipart.Form) error <span class="cov8" title="1">{
+    requiredFields := []string{"UserID", "Price", "Name", "Description", "Category", "Ubication"}
+    for _, field := range requiredFields </span><span class="cov8" title="1">{
+        if len(form.Value[field]) == 0 </span><span class="cov8" title="1">{
+            return fmt.Errorf("missing required field: %s", field)
+        }</span>
+    }
+    <span class="cov8" title="1">return nil</span>
+}
+
+func (c *ProductServiceImpl) CreateProductService(form *multipart.Form, image *multipart.FileHeader) (models.Product, error)<span class="cov8" title="1">{
+        var product models.Product
+        if err := validateRequiredFields(form); err != nil </span><span class="cov8" title="1">{
+        return product, err
+    }</span>
+        <span class="cov8" title="1">userID, err := strconv.ParseUint(form.Value["UserID"][0], 10, 32)
+        if err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">price, err := strconv.ParseFloat(form.Value["Price"][0], 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">cloudinaryURL, err := c.cloudinaryClient.UploadImage(&amp;db.MultipartFileHeaderAdapter{FileHeader: image})
+        if err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">product = models.Product{
+                UserID:      uint(userID),
+                Name:        form.Value["Name"][0],
+                Description: form.Value["Description"][0],
+                Category:    form.Value["Category"][0],
+                Price:       float64(price),
+                Rate:        0.0,
+                Ubication:   form.Value["Ubication"][0],
+                Image:       cloudinaryURL,
+        }
+        if err := c.dbClient.Create(&amp;product); err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">return product, nil</span>
+}
+
+func (c *ProductServiceImpl) UpdateProductService(productID uint, form *multipart.Form, image *multipart.FileHeader) (models.Product, error)<span class="cov8" title="1">{
+        var product models.Product
+    if err := c.dbClient.First(&amp;product, productID); err != nil </span><span class="cov8" title="1">{
+        return product, err
+    }</span>
+        <span class="cov8" title="1">if err := validateRequiredFields(form); err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">userID, err := strconv.ParseUint(form.Value["UserID"][0], 10, 32)
+        if err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">price, err := strconv.ParseFloat(form.Value["Price"][0], 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">product.UserID = uint(userID)
+        product.Name = form.Value["Name"][0]
+        product.Description = form.Value["Description"][0]
+        product.Category = form.Value["Category"][0]
+        product.Price = float64(price)
+        product.Ubication = form.Value["Ubication"][0]
+        if image != nil </span><span class="cov8" title="1">{
+                cloudinaryURL, err := c.cloudinaryClient.UploadImage(&amp;db.MultipartFileHeaderAdapter{FileHeader: image})
+                if err != nil </span><span class="cov8" title="1">{
+                        return product, err
+                }</span>
+                <span class="cov8" title="1">product.Image = cloudinaryURL</span>
+        }
+        <span class="cov8" title="1">if err := c.dbClient.Save(&amp;product); err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">return product, nil</span>
+}
+
+func (c *ProductServiceImpl) GetProductsService() ([]models.Product, error) <span class="cov8" title="1">{
+        var products []models.Product
+        if err := c.dbClient.Find(&amp;products); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return products, nil</span>
+}
+
+func (c *ProductServiceImpl) GetProductByIDService(id uint) (models.Product, error) <span class="cov8" title="1">{
+        var product models.Product
+        if err := c.dbClient.First(&amp;product, id); err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">return product, nil</span>
+}
+
+func (c *ProductServiceImpl) GetProductsByCategoryService(category string) ([]models.Product, error) <span class="cov8" title="1">{
+        var products []models.Product
+        if category != "" </span><span class="cov8" title="1">{
+                err := c.dbClient.FindWithCondition(&amp;products, "category = ?", category)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        } else<span class="cov8" title="1"> {
+                err := c.dbClient.Find(&amp;products)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+        <span class="cov8" title="1">return products, nil</span>
+}
+
+func (c *ProductServiceImpl) SearchProductsService(searchTerm string) ([]models.Product, error) <span class="cov8" title="1">{
+        var products []models.Product
+        err := c.dbClient.FindWithCondition(&amp;products, "name LIKE ? OR description LIKE ?", "%"+searchTerm+"%", "%"+searchTerm+"%")
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return products, nil</span>
+}
+
+func (c *ProductServiceImpl) DeleteProductService(productID uint) error <span class="cov8" title="1">{
+        if err := c.dbClient.DeleteWithCondition(&amp;models.Comment{}, "product_id = ?", productID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if err := c.dbClient.DeleteByID(&amp;models.Product{}, productID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *ProductServiceImpl) PremiumService(productID uint) (models.Product, error) <span class="cov8" title="1">{
+        var product models.Product
+        if err := c.dbClient.First(&amp;product, productID); err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">product.Status = !product.Status
+        if err := c.dbClient.Save(&amp;product); err != nil </span><span class="cov8" title="1">{
+                return product, err
+        }</span>
+        <span class="cov8" title="1">return product, nil</span>
+}
+
+func (c *ProductServiceImpl) GetProductsPremiumService() ([]models.Product, error) <span class="cov8" title="1">{
+        var products []models.Product
+        err := c.dbClient.FindWithCondition(&amp;products, "status = ?", true)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return products, nil</span>
+}</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
