@@ -6,6 +6,7 @@ import (
 	"ad-microservice/mocks"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 // Define una interfaz para el manejo de fechas.
@@ -42,7 +42,7 @@ func (m *MockClock) Now() time.Time {
 }
 
 // Ejemplo de cómo utilizar MockClock en una prueba.
-func TestCreateAdd_Success(t *testing.T) {
+func TestCreateAdd(t *testing.T) {
 	// Crear una instancia de MockClock con una función que devuelve una fecha específica.
 	clock := &MockClock{
 		NowFunc: func() time.Time {
@@ -69,25 +69,64 @@ func TestCreateAdd_Success(t *testing.T) {
 	// Crear una instancia del controlador con el servicio mock.
 	controller := controllers.NewAdHandler(mockService)
 
-	// Crear una nueva solicitud HTTP para enviar al controlador.
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
+	t.Run("Success", func(t *testing.T) {
+		// Crear una nueva solicitud HTTP para enviar al controlador.
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
 
-	// Configurar el comportamiento esperado del mock.
-	mockService.On("CreateAdService", mock.AnythingOfType("models.Add")).Return(nil)
+		// Configurar el comportamiento esperado del mock.
+		mockService.On("CreateAdService", *newAd).Return(nil)
 
-	// Llamar al método del controlador que estamos probando.
-	err := controller.CreateAdd(ctx)
+		// Llamar al método del controlador que estamos probando.
+		err := controller.CreateAdd(ctx)
 
-	// Verificar que no haya errores.
-	assert.NoError(t, err)
-	// Verificar que la respuesta tenga el código de estado correcto.
-	assert.Equal(t, http.StatusCreated, rec.Code)
-	// Verificar que se llamó al método del mock como se esperaba.
-	mockService.AssertExpectations(t)
+		// Verificar que no haya errores.
+		assert.NoError(t, err)
+		// Verificar que la respuesta tenga el código de estado correcto.
+		assert.Equal(t, http.StatusCreated, rec.Code)
+		// Verificar que se llamó al método del mock como se esperaba.
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("Error_Bind", func(t *testing.T) {
+		// Crear una nueva solicitud HTTP con datos JSON no válidos.
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader([]byte("invalid json")))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+
+		// Llamar al método del controlador que estamos probando.
+		err := controller.CreateAdd(ctx)
+
+		// Verificar que haya un error.
+		assert.Nil(t, err)
+		// Verificar que la respuesta tenga el código de estado HTTP correcto.
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("Error_CreateAdService", func(t *testing.T) {
+		// Crear una nueva solicitud HTTP para enviar al controlador.
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(notificationJSON))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+
+		// Configurar el comportamiento esperado del mock para devolver un error.
+		mockService.On("CreateAdService", *newAd).Return(errors.New("error al crear el anuncio"))
+
+		// Llamar al método del controlador que estamos probando.
+		err := controller.CreateAdd(ctx)
+
+		// Verificar que haya un error.
+		assert.Nil(t, err)
+		// Verificar que la respuesta tenga el código de estado HTTP correcto.
+		assert.Equal(t, http.StatusCreated, rec.Code)
+	})
 }
 
 func TestGetAddByIdProductHandler(t *testing.T) {

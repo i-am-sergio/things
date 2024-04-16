@@ -28,17 +28,17 @@ var errorMessage string = "Internal Server Error"
 func (s *AdHandler) CreateAdd(c echo.Context) error {
 	// Crear una instancia de models.Add
 	ad := new(models.Add)
-
 	// Deserializar los datos del cuerpo de la solicitud en la instancia de models.Add
 	if err := c.Bind(ad); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "no se pudo procesar los datos"})
+		// Si hay un error al procesar los datos, devolver un código de estado HTTP 400 (Bad Request)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "no se pudieron procesar los datos"})
 	}
-
 	// Llamar a CreateAdService con el valor de models.Add
 	if err := s.adService.CreateAdService(*ad); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "no se guardo en la bd"})
+		// Si hay un error al guardar en la base de datos, devolver un código de estado HTTP 500 (Internal Server Error)
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "no se pudo guardar en la base de datos"})
 	}
-
+	// Si no hay errores, devolver un código de estado HTTP 201 (Created)
 	return c.JSON(http.StatusCreated, "Creado exitosamente")
 }
 
