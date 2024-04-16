@@ -12,32 +12,28 @@ import (
 
 // MySQLConfig representa la configuración básica para conectarse a MySQL.
 type MySQLConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Database string
-
 	DB *gorm.DB // Agregar un campo para almacenar la conexión a la base de datos
+}
+
+func NewAdRepository(db *gorm.DB) *MySQLConfig {
+	return &MySQLConfig{
+		DB: db,
+	}
 }
 
 // check implementation of interface
 var _ repository.AdRepositoryInterface = &MySQLConfig{}
 
-func SetMysql() *MySQLConfig {
-	return &MySQLConfig{
-		Host:     "roundhouse.proxy.rlwy.net",
-		Port:     "58427",
-		Username: "root",
-		Password: "zblFuWrDprQNqiIffZpQIgkkTgofxSiF",
-		Database: "railway",
-	}
-}
-
 // ConnectDB inicializa y conecta a la base de datos MySQL utilizando la configuración proporcionada.
 func (config *MySQLConfig) ConnectDB() error {
+	Host := "roundhouse.proxy.rlwy.net"
+	Port := "58427"
+	Username := "root"
+	Password := "zblFuWrDprQNqiIffZpQIgkkTgofxSiF"
+	Database := "railway"
+
 	// Crear el DSN (Data Source Name)
-	DSN := config.Username + ":" + config.Password + "@tcp(" + config.Host + ":" + config.Port + ")/" + config.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
+	DSN := Username + ":" + Password + "@tcp(" + Host + ":" + Port + ")/" + Database + "?charset=utf8mb4&parseTime=True&loc=Local"
 
 	// Conectar a la base de datos
 	db, err := gorm.Open(mysql.Open(DSN), &gorm.Config{})
@@ -96,8 +92,13 @@ func (config *MySQLConfig) GetAddByIDProduct(productID string) (*models.Add, err
 	}
 
 	var add models.Add
-	result := config.DB.Where("product_id = ?", productID).First(&add)
+	result := config.DB.Where("product_id = ?", productID).Find(&add)
 	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	// Verificar si se encontraron resultados
+	if result.RowsAffected == 0 {
 		return nil, result.Error
 	}
 	return &add, nil

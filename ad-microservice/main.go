@@ -16,7 +16,7 @@ import (
 func main() {
 
 	// Inicializar la configuración de la base de datos MySQL
-	mysqlConfig := repositories.SetMysql()
+	mysqlConfig := repositories.NewAdRepository(nil) // Pasar nil como db inicialmente
 
 	// Conectar a la base de datos
 	if err := mysqlConfig.ConnectDB(); err != nil {
