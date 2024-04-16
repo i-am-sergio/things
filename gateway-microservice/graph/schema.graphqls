@@ -20,11 +20,46 @@ type User {
   password: String
 }
 
+type Product {
+  id: Int!
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String
+  userID: Int!
+  state: Boolean!
+  status: Boolean!
+  name: String!
+  description: String!
+  image: String!
+  category: String!
+  price: Float!
+  rate: Float!
+  ubication: String!
+  comments: [Comment!]!
+}
+
+type Comment {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String
+  userID: ID!
+  productID: ID!
+  comment: String!
+  rating: Float!
+}
+
 type Query {
   getNotificationById(id: ID!): Notification!
   getUserById(id_auth: String): User!
+  getProducts: [Product!]!
 }
 
 type Mutation {
-  createNotification(userId: String!, title: String!, message: String!, isRead: Boolean!): Notification!
+  createNotification(
+    userId: String!
+    title: String!
+    message: String!
+    isRead: Boolean!
+  ): Notification!
 }

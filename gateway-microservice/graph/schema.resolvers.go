@@ -23,7 +23,11 @@ func (r *queryResolver) GetNotificationByID(ctx context.Context, id string) (*mo
 // GetUserByID is the resolver for the getUserById field.
 func (r *queryResolver) GetUserByID(ctx context.Context, idAuth *string) (*model.User, error) {
 	return r.Resolver.GetUserById(ctx, *idAuth)
+}
 
+// GetProducts is the resolver for the getProducts field.
+func (r *queryResolver) GetProducts(ctx context.Context) ([]*model.Product, error) {
+	return r.Resolver.GetProducts(ctx)
 }
 
 // Mutation returns MutationResolver implementation.

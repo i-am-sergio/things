@@ -1,8 +1,6 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
-
   mongodb:
     image: bitnami/mongodb:7.0
     restart: always
@@ -11,25 +9,13 @@ services:
     networks:
       - default
 
-  mysqldb:
-    image: bitnami/mysql:8.0
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: admin
-    ports:
-      - "3306:3306"
-    networks:
-      - default
-
   # Microservices
-  
+
   productsmcsv:
     build:
       context: ./product-microservice
     ports:
       - "8002:8002"
-    depends_on:
-      - mysqldb
     networks:
       - default
 
@@ -57,7 +43,6 @@ services:
     ports:
       - "8888:8888"
     depends_on:
-      - mysqldb
       - mongodb
       - authmcsv
       - notificationsmcsv

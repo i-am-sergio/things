@@ -2,6 +2,17 @@
 
 package model
 
+type Comment struct {
+	ID        string  `json:"id"`
+	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
+	DeletedAt *string `json:"deletedAt,omitempty"`
+	UserID    string  `json:"userID"`
+	ProductID string  `json:"productID"`
+	Comment   string  `json:"comment"`
+	Rating    float64 `json:"rating"`
+}
+
 type Mutation struct {
 }
 
@@ -15,6 +26,24 @@ type Notification struct {
 	Type      *string `json:"type,omitempty"`
 	CreatedAt *string `json:"createdAt,omitempty"`
 	UpdatedAt *string `json:"updatedAt,omitempty"`
+}
+
+type Product struct {
+	ID          int        `json:"id"`
+	CreatedAt   string     `json:"createdAt"`
+	UpdatedAt   string     `json:"updatedAt"`
+	DeletedAt   *string    `json:"deletedAt,omitempty"`
+	UserID      int        `json:"userID"`
+	State       bool       `json:"state"`
+	Status      bool       `json:"status"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Image       string     `json:"image"`
+	Category    string     `json:"category"`
+	Price       float64    `json:"price"`
+	Rate        float64    `json:"rate"`
+	Ubication   string     `json:"ubication"`
+	Comments    []*Comment `json:"comments"`
 }
 
 type Query struct {
