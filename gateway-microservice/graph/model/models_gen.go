@@ -3,12 +3,12 @@
 package model
 
 type Comment struct {
-	ID        string  `json:"id"`
+	ID        int     `json:"id"`
 	CreatedAt string  `json:"createdAt"`
 	UpdatedAt string  `json:"updatedAt"`
 	DeletedAt *string `json:"deletedAt,omitempty"`
-	UserID    string  `json:"userID"`
-	ProductID string  `json:"productID"`
+	UserID    int     `json:"userID"`
+	ProductID int     `json:"productID"`
 	Comment   string  `json:"comment"`
 	Rating    float64 `json:"rating"`
 }

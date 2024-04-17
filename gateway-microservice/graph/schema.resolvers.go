@@ -30,6 +30,11 @@ func (r *queryResolver) GetProducts(ctx context.Context) ([]*model.Product, erro
 	return r.Resolver.GetProducts(ctx)
 }
 
+// GetComments is the resolver for the getComments field.
+func (r *queryResolver) GetComments(ctx context.Context) ([]*model.Comment, error) {
+	return r.Resolver.GetComments(ctx)
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

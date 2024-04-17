@@ -29,6 +29,20 @@ query {
   }
 }
 
+# GET all comments
+query {
+  getComments() {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    userID
+    productID
+    comment
+    rating
+  }
+}
+
 
 # GQL Mutation to create a notification
 mutation {

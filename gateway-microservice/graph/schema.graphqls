@@ -39,12 +39,12 @@ type Product {
 }
 
 type Comment {
-  id: ID!
+  id: Int!
   createdAt: String!
   updatedAt: String!
   deletedAt: String
-  userID: ID!
-  productID: ID!
+  userID: Int!
+  productID: Int!
   comment: String!
   rating: Float!
 }
@@ -53,6 +53,7 @@ type Query {
   getNotificationById(id: ID!): Notification!
   getUserById(id_auth: String): User!
   getProducts: [Product!]!
+  getComments: [Comment!]!
 }
 
 type Mutation {
