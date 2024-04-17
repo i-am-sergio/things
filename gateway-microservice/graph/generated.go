@@ -93,6 +93,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetComments         func(childComplexity int) int
 		GetNotificationByID func(childComplexity int, id string) int
 		GetProducts         func(childComplexity int) int
 		GetUserByID         func(childComplexity int, idAuth *string) int
@@ -116,6 +117,7 @@ type QueryResolver interface {
 	GetNotificationByID(ctx context.Context, id string) (*model.Notification, error)
 	GetUserByID(ctx context.Context, idAuth *string) (*model.User, error)
 	GetProducts(ctx context.Context) ([]*model.Product, error)
+	GetComments(ctx context.Context) ([]*model.Comment, error)
 }
 
 type executableSchema struct {
@@ -372,6 +374,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Product.UserID(childComplexity), true
+
+	case "Query.getComments":
+		if e.complexity.Query.GetComments == nil {
+			break
+		}
+
+		return e.complexity.Query.GetComments(childComplexity), true
 
 	case "Query.getNotificationById":
 		if e.complexity.Query.GetNotificationByID == nil {
@@ -727,9 +736,9 @@ func (ec *executionContext) _Comment_id(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Comment_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -739,7 +748,7 @@ func (ec *executionContext) fieldContext_Comment_id(ctx context.Context, field g
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -900,9 +909,9 @@ func (ec *executionContext) _Comment_userID(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Comment_userID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -912,7 +921,7 @@ func (ec *executionContext) fieldContext_Comment_userID(ctx context.Context, fie
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -944,9 +953,9 @@ func (ec *executionContext) _Comment_productID(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Comment_productID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -956,7 +965,7 @@ func (ec *executionContext) fieldContext_Comment_productID(ctx context.Context, 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2389,6 +2398,68 @@ func (ec *executionContext) fieldContext_Query_getProducts(ctx context.Context, 
 				return ec.fieldContext_Product_comments(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getComments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getComments(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetComments(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚕᚖgatewayᚑmicroserviceᚋgraphᚋmodelᚐCommentᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getComments(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Comment_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Comment_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Comment_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Comment_deletedAt(ctx, field)
+			case "userID":
+				return ec.fieldContext_Comment_userID(ctx, field)
+			case "productID":
+				return ec.fieldContext_Comment_productID(ctx, field)
+			case "comment":
+				return ec.fieldContext_Comment_comment(ctx, field)
+			case "rating":
+				return ec.fieldContext_Comment_rating(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 		},
 	}
 	return fc, nil
@@ -4945,6 +5016,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getProducts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getComments":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getComments(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
