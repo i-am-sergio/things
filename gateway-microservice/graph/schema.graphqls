@@ -1,0 +1,66 @@
+type Notification {
+  id: ID!
+  userId: String
+  title: String
+  message: String
+  image: String
+  isRead: Boolean
+  type: String
+  createdAt: String
+  updatedAt: String
+}
+
+type User {
+  idAuth: String
+  email: String
+  role: String
+  name: String
+  image: String
+  ubication: String
+  password: String
+}
+
+type Product {
+  id: Int!
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String
+  userID: Int!
+  state: Boolean!
+  status: Boolean!
+  name: String!
+  description: String!
+  image: String!
+  category: String!
+  price: Float!
+  rate: Float!
+  ubication: String!
+  comments: [Comment!]!
+}
+
+type Comment {
+  id: Int!
+  createdAt: String!
+  updatedAt: String!
+  deletedAt: String
+  userID: Int!
+  productID: Int!
+  comment: String!
+  rating: Float!
+}
+
+type Query {
+  getNotificationById(id: ID!): Notification!
+  getUserById(id_auth: String): User!
+  getProducts: [Product!]!
+  getComments: [Comment!]!
+}
+
+type Mutation {
+  createNotification(
+    userId: String!
+    title: String!
+    message: String!
+    isRead: Boolean!
+  ): Notification!
+}
