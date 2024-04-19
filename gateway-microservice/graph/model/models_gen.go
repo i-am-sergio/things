@@ -2,6 +2,17 @@
 
 package model
 
+type Comment struct {
+	ID        int     `json:"id"`
+	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
+	DeletedAt *string `json:"deletedAt,omitempty"`
+	UserID    int     `json:"userID"`
+	ProductID int     `json:"productID"`
+	Comment   string  `json:"comment"`
+	Rating    float64 `json:"rating"`
+}
+
 type Mutation struct {
 }
 
@@ -17,5 +28,33 @@ type Notification struct {
 	UpdatedAt *string `json:"updatedAt,omitempty"`
 }
 
+type Product struct {
+	ID          int        `json:"id"`
+	CreatedAt   string     `json:"createdAt"`
+	UpdatedAt   string     `json:"updatedAt"`
+	DeletedAt   *string    `json:"deletedAt,omitempty"`
+	UserID      int        `json:"userID"`
+	State       bool       `json:"state"`
+	Status      bool       `json:"status"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Image       string     `json:"image"`
+	Category    string     `json:"category"`
+	Price       float64    `json:"price"`
+	Rate        float64    `json:"rate"`
+	Ubication   string     `json:"ubication"`
+	Comments    []*Comment `json:"comments"`
+}
+
 type Query struct {
+}
+
+type User struct {
+	IDAuth    *string `json:"idAuth,omitempty"`
+	Email     *string `json:"email,omitempty"`
+	Role      *string `json:"role,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Image     *string `json:"image,omitempty"`
+	Ubication *string `json:"ubication,omitempty"`
+	Password  *string `json:"password,omitempty"`
 }

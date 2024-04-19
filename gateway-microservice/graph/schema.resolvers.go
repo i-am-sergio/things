@@ -20,6 +20,21 @@ func (r *queryResolver) GetNotificationByID(ctx context.Context, id string) (*mo
 	return r.Resolver.GetNotificationById(ctx, id)
 }
 
+// GetUserByID is the resolver for the getUserById field.
+func (r *queryResolver) GetUserByID(ctx context.Context, idAuth *string) (*model.User, error) {
+	return r.Resolver.GetUserById(ctx, *idAuth)
+}
+
+// GetProducts is the resolver for the getProducts field.
+func (r *queryResolver) GetProducts(ctx context.Context) ([]*model.Product, error) {
+	return r.Resolver.GetProducts(ctx)
+}
+
+// GetComments is the resolver for the getComments field.
+func (r *queryResolver) GetComments(ctx context.Context) ([]*model.Comment, error) {
+	return r.Resolver.GetComments(ctx)
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -28,3 +43,13 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) GetUseronByID(ctx context.Context, idAuth *string) (*model.User, error) {
+	return r.Resolver.GetUserById(ctx, *idAuth)
+}

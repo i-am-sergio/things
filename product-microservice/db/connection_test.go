@@ -56,7 +56,8 @@ func TestGormDBClientInit(t *testing.T) {
 		expectedEnvPath := ".env"
 		mockEnvLoader.On("LoadEnv", expectedEnvPath).Return(nil)
 		mockDBConnector.On("Open", mock.AnythingOfType("string")).Return(db, nil)
-		err := Init(mockEnvLoader, mockDBConnector)
+		realDBInit := RealDBInitImpl{}
+		_,err := realDBInit.Init(mockEnvLoader, mockDBConnector)
 		require.NoError(t, err)
 		mockEnvLoader.AssertExpectations(t)
 		mockDBConnector.AssertExpectations(t)
@@ -67,7 +68,8 @@ func TestGormDBClientInit(t *testing.T) {
 		mockDBConnector := new(MockDBConnector)
 		mockError := fmt.Errorf("failed to load .env file")
 		mockEnvLoader.On("LoadEnv",".env").Return(mockError)
-		err := Init(mockEnvLoader, mockDBConnector)
+		realDBInit := RealDBInitImpl{}
+		_,err := realDBInit.Init(mockEnvLoader, mockDBConnector)
 		require.Error(t, err)
 		expectedError := "failed to initialize database: error loading .env file: failed to load .env file"
 		assert.Equal(t, expectedError, err.Error())
@@ -82,7 +84,8 @@ func TestGormDBClientInit(t *testing.T) {
 		db := new(gorm.DB)
 		mockEnvLoader.On("LoadEnv",".env").Return(nil)
 		mockDBConnector.On("Open", mock.AnythingOfType("string")).Return(db, mockError)
-		err := Init(mockEnvLoader, mockDBConnector)
+		realDBInit := RealDBInitImpl{}
+		_,err := realDBInit.Init(mockEnvLoader, mockDBConnector)
 		require.Error(t, err)
 		expectedError := "failed to initialize database: failed to connect to database: failed to connect to database"
 		assert.Equal(t, expectedError, err.Error())
@@ -99,8 +102,10 @@ func TestInit(t *testing.T) {
         db := new(gorm.DB)
         mockEnvLoader.On("LoadEnv",".env").Return(nil)
         mockDBConnector.On("Open", mock.AnythingOfType("string")).Return(db, nil)
-        err := Init(mockEnvLoader, mockDBConnector)
+        realDBInit := RealDBInitImpl{}
+		client, err := realDBInit.Init(mockEnvLoader, mockDBConnector)
         require.NoError(t, err)
+		assert.NotNil(t, client)
         mockEnvLoader.AssertExpectations(t)
         mockDBConnector.AssertExpectations(t)
     })
@@ -111,7 +116,8 @@ func TestInit(t *testing.T) {
         mockError := fmt.Errorf("database connection failed")
         mockEnvLoader.On("LoadEnv",".env").Return(nil)
         mockDBConnector.On("Open", mock.AnythingOfType("string")).Return(&gorm.DB{}, mockError) // Devuelve una instancia válida de *gorm.DB
-        err := Init(mockEnvLoader, mockDBConnector)
+        realDBInit := RealDBInitImpl{}
+		_,err := realDBInit.Init(mockEnvLoader, mockDBConnector)
         require.Error(t, err)
         expectedError := fmt.Sprintf("failed to initialize database: failed to connect to database: %v", mockError)
         assert.Equal(t, expectedError, err.Error())

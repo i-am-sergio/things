@@ -157,3 +157,8 @@ Example:
 
 **DELETE** `/comments/:id`  
 Deletes a comment specified by its ID.
+
+## Code Quality and Testing
+
+The project emphasizes high code quality and robust testing, integrating Vitest for unit testing. You can view the project's code quality metrics and test coverage on SonarCloud at the following link:
+[View SonarCloud Metrics](https://sonarcloud.io/summary/overall?id=shinji_things_product_microservice)

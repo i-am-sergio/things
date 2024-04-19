@@ -1,21 +1,41 @@
+version: "3.8"
+
 services:
-  authmcsv:
-    build:
-      context: ./auth-microservice
+  mongodb:
+    image: bitnami/mongodb:7.0
+    restart: always
     ports:
-      - "8001:8001"
+      - "27017:27017"
+    networks:
+      - default
+
+  # Microservices
 
   productsmcsv:
     build:
       context: ./product-microservice
     ports:
       - "8002:8002"
+    networks:
+      - default
+
+  authmcsv:
+    build:
+      context: ./auth-microservice
+    ports:
+      - "8001:8001"
+    networks:
+      - default
 
   notificationsmcsv:
     build:
       context: ./notifications-microservice
     ports:
       - "8005:8005"
+    depends_on:
+      - mongodb
+    networks:
+      - default
 
   gatewaymcsv:
     build:
@@ -23,5 +43,9 @@ services:
     ports:
       - "8888:8888"
     depends_on:
+      - mongodb
       - authmcsv
       - notificationsmcsv
+      - productsmcsv
+    networks:
+      - default

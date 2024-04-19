@@ -8,6 +8,42 @@ query {
   }
 }
 
+
+# GET all products
+query {
+  getProducts() {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    userID
+    state
+    status
+    name
+    description
+    image
+    category
+    price
+    rate
+    ubication
+  }
+}
+
+# GET all comments
+query {
+  getComments() {
+    id
+    createdAt
+    updatedAt
+    deletedAt
+    userID
+    productID
+    comment
+    rating
+  }
+}
+
+
 # GQL Mutation to create a notification
 mutation {
   createNotification(userId:"123", title:"New Notification 111", message:"This is a new notification", isRead:false){
@@ -15,3 +51,4 @@ mutation {
     isRead
   }
 }
+

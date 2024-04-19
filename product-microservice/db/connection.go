@@ -10,8 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var Client repository.DBInterface
-
 type DBConnector interface {
     Open(dsn string) (*gorm.DB, error)
 }
@@ -52,15 +50,21 @@ func (cr *ConnectionRepository) Init() (*gorm.DB, error) {
     return db, nil
 }
 
-func Init(envLoader EnvLoader, dbConnector DBConnector) error {
+type RealDBInit interface{
+    Init(envLoader EnvLoader, dbConnector DBConnector) (repository.DBInterface, error)
+}
+
+type RealDBInitImpl struct{}
+
+func (r *RealDBInitImpl) Init(envLoader EnvLoader, dbConnector DBConnector) (repository.DBInterface, error) {
 	repo := NewConnectionRepository(envLoader, dbConnector)
     db, err := repo.Init()
     if err != nil {
-        return fmt.Errorf("failed to initialize database: %v", err)
+        return nil, fmt.Errorf("failed to initialize database: %v", err)
     }
 	gormClient := &repository.GormDBClient{
         DB: db,	
     }
-    Client = gormClient
-	return nil
+    var Client repository.DBInterface = gormClient
+    return Client, nil
 }
