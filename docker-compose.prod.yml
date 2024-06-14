@@ -1,0 +1,52 @@
+# docker compose -f docker-compose.prod.yml up -d
+services:
+
+  # Databases
+  mongodb:
+    image: bitnami/mongodb:7.0
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - default
+
+  # Microservices
+
+  authmcsv:
+    build:
+      context: ./auth-microservice
+    ports:
+      - "8001:8001"
+    networks:
+      - default
+  
+  productsmcsv:
+    build:
+      context: ./product-microservice
+    ports:
+      - "8002:8002"
+    networks:
+      - default
+
+  notificationsmcsv:
+    build:
+      context: ./notifications-microservice
+    ports:
+      - "8005:8005"
+    depends_on:
+      - mongodb
+    networks:
+      - default
+
+  gatewaymcsv:
+    build:
+      context: ./gateway-microservice
+    ports:
+      - "8888:8888"
+    depends_on:
+      - mongodb
+      - authmcsv
+      - notificationsmcsv
+      - productsmcsv
+    networks:
+      - default
